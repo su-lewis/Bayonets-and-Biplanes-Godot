@@ -1,0 +1,86 @@
+[gd_scene format=3 uid="uid://buiaupgdov2rt"]
+
+[ext_resource type="Texture2D" uid="uid://dj10yuejtt6ij" path="res://barracks.png" id="1_fxwnf"]
+[ext_resource type="Texture2D" uid="uid://vxiucmv24pd2" path="res://skyday.png" id="1_tkjg1"]
+[ext_resource type="Texture2D" uid="uid://bl02x4bu2dwlw" path="res://townbackdrop.png" id="2_y8d5v"]
+[ext_resource type="Script" uid="uid://fouqur20iwo" path="res://canvas_layer.gd" id="3_fxwnf"]
+[ext_resource type="Script" uid="uid://3a3sld4sghsx" path="res://camera_contoller.gd" id="3_tkjg1"]
+[ext_resource type="Script" uid="uid://dso6yy883o6eb" path="res://barracks.gd" id="3_vsh2u"]
+
+[node name="Battlefield" type="Node2D" unique_id=1725853040]
+metadata/_edit_lock_ = true
+
+[node name="SkyParallax" type="Parallax2D" parent="." unique_id=1045096618]
+scroll_scale = Vector2(0.008, 0.008)
+repeat_size = Vector2(1920, 0)
+
+[node name="SkyDay" type="Sprite2D" parent="SkyParallax" unique_id=220661090]
+texture = ExtResource("1_tkjg1")
+centered = false
+
+[node name="TownParallax" type="Parallax2D" parent="." unique_id=298040615]
+scroll_scale = Vector2(0.01, 0.01)
+repeat_size = Vector2(1920, 0)
+
+[node name="TownBackdrop" type="Sprite2D" parent="TownParallax" unique_id=1248598849]
+position = Vector2(0, -220)
+texture = ExtResource("2_y8d5v")
+centered = false
+
+[node name="Ground" type="ColorRect" parent="TownParallax" unique_id=933642097]
+offset_top = 851.0
+offset_right = 147.66533
+offset_bottom = 865.2761
+scale = Vector2(40.62565, 16.040813)
+color = Color(0.31770375, 0.17190287, 9.62615e-08, 1)
+
+[node name="Barracks" type="Sprite2D" parent="." unique_id=878772379]
+position = Vector2(514, 450.00003)
+scale = Vector2(0.17, 0.17)
+texture = ExtResource("1_fxwnf")
+script = ExtResource("3_vsh2u")
+
+[node name="Marker2D" type="Marker2D" parent="Barracks" unique_id=1801584774]
+position = Vector2(1182.353, 2899.9995)
+
+[node name="PlaneMarker" type="Marker2D" parent="Barracks" unique_id=1072361226]
+position = Vector2(741.1765, 611.7647)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
+scale = Vector2(0.2573564, 0.26329544)
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 6000
+limit_bottom = 1080
+limit_smoothed = true
+script = ExtResource("3_tkjg1")
+
+[node name="GroundPath" type="StaticBody2D" parent="." unique_id=1577460652]
+position = Vector2(116, 8)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1288310893]
+position = Vector2(1332.0001, -21742.002)
+scale = Vector2(1.1760838, 32.874363)
+polygon = PackedVector2Array(-757.223, 689.8527, 1334.4645, 693.07715, 3381.0874, 689.7919)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1765237454]
+script = ExtResource("3_fxwnf")
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=671423834]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Button" type="Button" parent="CanvasLayer" unique_id=563773558]
+offset_left = 539.0
+offset_top = 1000.0
+offset_right = 777.0
+offset_bottom = 1060.0
+text = "Spawn Soldier (75 War Bonds)"
+
+[node name="PlaneButton" type="Button" parent="CanvasLayer" unique_id=1029574734]
+offset_left = 874.0
+offset_top = 999.0
+offset_right = 1195.0
+offset_bottom = 1060.0
+text = "Call Biplane Air Support (120 War Bonds)"
