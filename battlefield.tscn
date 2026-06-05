@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://buiaupgdov2rt"]
 
-[ext_resource type="Texture2D" uid="uid://dj10yuejtt6ij" path="res://barracks.png" id="1_fxwnf"]
-[ext_resource type="Texture2D" uid="uid://vxiucmv24pd2" path="res://skyday.png" id="1_tkjg1"]
-[ext_resource type="Texture2D" uid="uid://bl02x4bu2dwlw" path="res://townbackdrop.png" id="2_y8d5v"]
+[ext_resource type="Texture2D" uid="uid://ccyu8pg7khem" path="res://townbackdrpo.png" id="1_vsh2u"]
+[ext_resource type="Texture2D" uid="uid://1nhl4a2arh63" path="res://hq.png" id="2_tkjg1"]
 [ext_resource type="Script" uid="uid://fouqur20iwo" path="res://canvas_layer.gd" id="3_fxwnf"]
 [ext_resource type="Script" uid="uid://3a3sld4sghsx" path="res://camera_contoller.gd" id="3_tkjg1"]
 [ext_resource type="Script" uid="uid://dso6yy883o6eb" path="res://barracks.gd" id="3_vsh2u"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vsh2u"]
+load_path = "res://.godot/imported/skyday.png-b0895a8f6828a29cb18ab02f1368a908.ctex"
 
 [node name="Battlefield" type="Node2D" unique_id=1725853040]
 metadata/_edit_lock_ = true
@@ -15,36 +17,40 @@ scroll_scale = Vector2(0.008, 0.008)
 repeat_size = Vector2(1920, 0)
 
 [node name="SkyDay" type="Sprite2D" parent="SkyParallax" unique_id=220661090]
-texture = ExtResource("1_tkjg1")
+texture = SubResource("CompressedTexture2D_vsh2u")
 centered = false
 
 [node name="TownParallax" type="Parallax2D" parent="." unique_id=298040615]
 scroll_scale = Vector2(0.01, 0.01)
-repeat_size = Vector2(1920, 0)
+repeat_size = Vector2(480, 0)
+repeat_times = 4
+metadata/_edit_lock_ = true
 
 [node name="TownBackdrop" type="Sprite2D" parent="TownParallax" unique_id=1248598849]
-position = Vector2(0, -220)
-texture = ExtResource("2_y8d5v")
+position = Vector2(605, 213)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("1_vsh2u")
 centered = false
 
 [node name="Ground" type="ColorRect" parent="TownParallax" unique_id=933642097]
-offset_top = 851.0
-offset_right = 147.66533
-offset_bottom = 865.2761
+offset_left = 960.0
+offset_top = 483.0
+offset_right = 983.6304
+offset_bottom = 520.2175
 scale = Vector2(40.62565, 16.040813)
 color = Color(0.31770375, 0.17190287, 9.62615e-08, 1)
 
-[node name="Barracks" type="Sprite2D" parent="." unique_id=878772379]
-position = Vector2(514, 450.00003)
-scale = Vector2(0.17, 0.17)
-texture = ExtResource("1_fxwnf")
+[node name="HQ" type="Sprite2D" parent="." unique_id=878772379]
+position = Vector2(519, 420)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_tkjg1")
 script = ExtResource("3_vsh2u")
 
-[node name="Marker2D" type="Marker2D" parent="Barracks" unique_id=1801584774]
-position = Vector2(1182.353, 2899.9995)
+[node name="Marker2D" type="Marker2D" parent="HQ" unique_id=1801584774]
+position = Vector2(972, 2028)
 
-[node name="PlaneMarker" type="Marker2D" parent="Barracks" unique_id=1072361226]
-position = Vector2(741.1765, 611.7647)
+[node name="PlaneMarker" type="Marker2D" parent="HQ" unique_id=1072361226]
+position = Vector2(-1116, -23.999939)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
 scale = Vector2(0.2573564, 0.26329544)
@@ -57,12 +63,10 @@ limit_smoothed = true
 script = ExtResource("3_tkjg1")
 
 [node name="GroundPath" type="StaticBody2D" parent="." unique_id=1577460652]
-position = Vector2(116, 8)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1288310893]
-position = Vector2(1332.0001, -21742.002)
-scale = Vector2(1.1760838, 32.874363)
-polygon = PackedVector2Array(-757.223, 689.8527, 1334.4645, 693.07715, 3381.0874, 689.7919)
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1524907598]
+position = Vector2(1011, 901)
+polygon = PackedVector2Array(6867, 140, 6872, 30, -996, 31, -1001, 146)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1765237454]
 script = ExtResource("3_fxwnf")

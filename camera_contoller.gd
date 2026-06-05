@@ -1,7 +1,7 @@
 extends Camera2D
 
 @export var pan_speed: float = 1800.0 # How fast the camera flies across the map
-@export var edge_margin: float = 300.0 # How close the mouse needs to be to the edge (in pixels)
+@export var edge_margin: float = 150.0 # How close the mouse needs to be to the edge (in pixels)
 
 func _process(delta):
 	var direction = 0.0

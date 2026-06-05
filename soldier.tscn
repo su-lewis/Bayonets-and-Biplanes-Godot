@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://qw5uyunj3o2f"]
 
 [ext_resource type="Script" uid="uid://4e5dwyki3yew" path="res://soldier.gd" id="1_ba3fx"]
-[ext_resource type="Texture2D" uid="uid://sgcod3rcyl5r" path="res://soldier.png" id="1_siw8g"]
+[ext_resource type="Texture2D" uid="uid://dh2wspp7oxt18" path="res://soldier.png" id="1_siw8g"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_8swxs"]
-radius = 88.0
-height = 418.88
+radius = 59.999992
+height = 629.99994
 
 [node name="Soldier" type="CharacterBody2D" unique_id=1497413185]
 scale = Vector2(0.2, 0.2)
@@ -13,9 +13,10 @@ collision_layer = 2
 script = ExtResource("1_ba3fx")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1036357060]
-position = Vector2(267, -288.105)
+position = Vector2(0, -320)
+scale = Vector2(1.25, 1.25)
 texture = ExtResource("1_siw8g")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=243647102]
-position = Vector2(0, -209.46)
+position = Vector2(-4.9999995, -315)
 shape = SubResource("CapsuleShape2D_8swxs")

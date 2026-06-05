@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh2wspp7oxt18"
-path="res://.godot/imported/soldier.png-cae83e95dfed7c4eb55625684896acfd.ctex"
+uid="uid://wwyua863v0hu"
+path="res://.godot/imported/fieldartillery.png-cb3d9c3d79aa8e1ca8d98a1c224b2bbe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://soldier.png"
-dest_files=["res://.godot/imported/soldier.png-cae83e95dfed7c4eb55625684896acfd.ctex"]
+source_file="res://fieldartillery.png"
+dest_files=["res://.godot/imported/fieldartillery.png-cb3d9c3d79aa8e1ca8d98a1c224b2bbe.ctex"]
 
 [params]
 
