@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://fouqur20iwo" path="res://canvas_layer.gd" id="3_fxwnf"]
 [ext_resource type="Script" uid="uid://3a3sld4sghsx" path="res://camera_contoller.gd" id="3_tkjg1"]
 [ext_resource type="Script" uid="uid://dso6yy883o6eb" path="res://barracks.gd" id="3_vsh2u"]
+[ext_resource type="PackedScene" uid="uid://c2ovm003k25k0" path="res://field_artillery.tscn" id="6_y8d5v"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vsh2u"]
 load_path = "res://.godot/imported/skyday.png-b0895a8f6828a29cb18ab02f1368a908.ctex"
@@ -38,7 +39,7 @@ offset_top = 483.0
 offset_right = 983.6304
 offset_bottom = 520.2175
 scale = Vector2(40.62565, 16.040813)
-color = Color(0.31770375, 0.17190287, 9.62615e-08, 1)
+color = Color(0.4335598, 0.24332848, 4.813075e-08, 1)
 
 [node name="HQ" type="Sprite2D" parent="." unique_id=878772379]
 position = Vector2(519, 420)
@@ -88,3 +89,6 @@ offset_top = 999.0
 offset_right = 1195.0
 offset_bottom = 1060.0
 text = "Call Biplane Air Support (120 War Bonds)"
+
+[node name="FieldArtillery" parent="." unique_id=392801141 instance=ExtResource("6_y8d5v")]
+position = Vector2(1075, 931)
