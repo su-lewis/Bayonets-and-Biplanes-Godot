@@ -7,7 +7,7 @@
 size = Vector2(1832, 858)
 
 [node name="Biplane" type="CharacterBody2D" unique_id=1701208706]
-scale = Vector2(0.2, 0.2)
+scale = Vector2(0.15, 0.15)
 collision_layer = 4
 script = ExtResource("1_4tuop")
 

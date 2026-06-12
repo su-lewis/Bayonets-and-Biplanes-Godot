@@ -22,8 +22,27 @@ func _on_spawn_button_pressed():
 
 func spawn_soldier():
 	var new_soldier = soldier_scene.instantiate()
-	get_parent().add_child(new_soldier)
+	
+	var top_lane = get_parent().get_node("Lanes/TopLane")
+	var mid_lane = get_parent().get_node("Lanes/MiddleLane")
+	var bot_lane = get_parent().get_node("Lanes/BottomLane")
+	var chosen_lane = [top_lane, mid_lane, bot_lane].pick_random()
+	
+	chosen_lane.add_child(new_soldier)
 	new_soldier.global_position = $Marker2D.global_position
+	
+	new_soldier.target_lane_y = chosen_lane.global_position.y
+	new_soldier.start_x = $Marker2D.global_position.x
+	
+	# --- THE FIXED SCALE ASSIGNMENT ---
+	var BASE_SCALE = 0.2
+	
+	if chosen_lane == top_lane:
+		new_soldier.target_scale = BASE_SCALE * 0.8  # Shrinks to 0.12
+	elif chosen_lane == mid_lane:
+		new_soldier.target_scale = BASE_SCALE * 0.9  # Shrinks to 0.135
+	else:
+		new_soldier.target_scale = BASE_SCALE * 1.0  # Stays at 0.15
 
 # --- BIPLANE SPAWNING logic ---
 func _on_plane_button_pressed():

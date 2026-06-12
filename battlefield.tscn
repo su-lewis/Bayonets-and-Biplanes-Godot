@@ -42,7 +42,7 @@ scale = Vector2(40.62565, 16.040813)
 color = Color(0.4335598, 0.24332848, 4.813075e-08, 1)
 
 [node name="HQ" type="Sprite2D" parent="." unique_id=878772379]
-position = Vector2(519, 420)
+position = Vector2(521, 404)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_tkjg1")
 script = ExtResource("3_vsh2u")
@@ -66,29 +66,45 @@ script = ExtResource("3_tkjg1")
 [node name="GroundPath" type="StaticBody2D" parent="." unique_id=1577460652]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1524907598]
-position = Vector2(1011, 901)
+position = Vector2(1014, 877)
 polygon = PackedVector2Array(6867, 140, 6872, 30, -996, 31, -1001, 146)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1765237454]
 script = ExtResource("3_fxwnf")
 
 [node name="Label" type="Label" parent="CanvasLayer" unique_id=671423834]
-offset_right = 40.0
-offset_bottom = 23.0
+visible = false
+offset_left = 286.0
+offset_top = 356.0
+offset_right = 326.0
+offset_bottom = 379.0
 
 [node name="Button" type="Button" parent="CanvasLayer" unique_id=563773558]
-offset_left = 539.0
-offset_top = 1000.0
-offset_right = 777.0
-offset_bottom = 1060.0
+offset_left = 572.0
+offset_top = 1016.0
+offset_right = 810.0
+offset_bottom = 1076.0
 text = "Spawn Soldier (75 War Bonds)"
 
 [node name="PlaneButton" type="Button" parent="CanvasLayer" unique_id=1029574734]
-offset_left = 874.0
-offset_top = 999.0
-offset_right = 1195.0
-offset_bottom = 1060.0
+offset_left = 814.0
+offset_top = 1016.0
+offset_right = 1135.0
+offset_bottom = 1076.0
+scale = Vector2(0.96, 1)
 text = "Call Biplane Air Support (120 War Bonds)"
 
 [node name="FieldArtillery" parent="." unique_id=392801141 instance=ExtResource("6_y8d5v")]
-position = Vector2(1075, 931)
+position = Vector2(1078, 908)
+
+[node name="Lanes" type="Node2D" parent="." unique_id=1440200053]
+y_sort_enabled = true
+
+[node name="TopLane" type="Node2D" parent="Lanes" unique_id=1140387156]
+position = Vector2(-4, 580)
+
+[node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
+position = Vector2(0, 780)
+
+[node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
+position = Vector2(0, 960)

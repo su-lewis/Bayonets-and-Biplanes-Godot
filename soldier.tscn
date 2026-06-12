@@ -10,6 +10,7 @@ height = 629.99994
 [node name="Soldier" type="CharacterBody2D" unique_id=1497413185]
 scale = Vector2(0.2, 0.2)
 collision_layer = 2
+collision_mask = 0
 script = ExtResource("1_ba3fx")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1036357060]

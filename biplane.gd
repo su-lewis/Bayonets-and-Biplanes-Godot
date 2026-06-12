@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 # Set the horizontal speed (adjust this number to your liking)
-@export var speed = 180.0
+@export var speed = 150.0
 
 func _physics_process(delta):
 	# Apply only horizontal movement
