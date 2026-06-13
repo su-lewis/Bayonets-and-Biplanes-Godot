@@ -101,10 +101,10 @@ position = Vector2(1078, 908)
 y_sort_enabled = true
 
 [node name="TopLane" type="Node2D" parent="Lanes" unique_id=1140387156]
-position = Vector2(-4, 580)
+position = Vector2(0, 560)
 
 [node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
-position = Vector2(0, 780)
+position = Vector2(0, 750)
 
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
-position = Vector2(0, 960)
+position = Vector2(0, 950)

@@ -38,9 +38,9 @@ func spawn_soldier():
 	var BASE_SCALE = 0.2
 	
 	if chosen_lane == top_lane:
-		new_soldier.target_scale = BASE_SCALE * 0.8  # Shrinks to 0.12
+		new_soldier.target_scale = BASE_SCALE * 0.9  # Shrinks to 0.12
 	elif chosen_lane == mid_lane:
-		new_soldier.target_scale = BASE_SCALE * 0.9  # Shrinks to 0.135
+		new_soldier.target_scale = BASE_SCALE * 0.95  # Shrinks to 0.135
 	else:
 		new_soldier.target_scale = BASE_SCALE * 1.0  # Stays at 0.15
 

@@ -6,7 +6,7 @@ var target_lane_y: float = 0.0
 var target_scale: float = 0.15 # <--- Changed this from 1.0
 var base_scale: float = 0.2   # <--- Added this to remember our starting size
 var start_x: float = 0.0
-var walk_out_distance: float = 80.0 
+var walk_out_distance: float = 200.0 
 
 var start_y_for_scale: float = 0.0 # Remembers where we started the diagonal march
 
