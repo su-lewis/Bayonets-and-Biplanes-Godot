@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://fouqur20iwo" path="res://canvas_layer.gd" id="3_fxwnf"]
 [ext_resource type="Script" uid="uid://3a3sld4sghsx" path="res://camera_contoller.gd" id="3_tkjg1"]
 [ext_resource type="Script" uid="uid://dso6yy883o6eb" path="res://barracks.gd" id="3_vsh2u"]
-[ext_resource type="PackedScene" uid="uid://c2ovm003k25k0" path="res://field_artillery.tscn" id="6_y8d5v"]
+[ext_resource type="Texture2D" uid="uid://wwyua863v0hu" path="res://fieldartillery.png" id="8_ki6g1"]
 
 [node name="Battlefield" type="Node2D" unique_id=1725853040]
 metadata/_edit_lock_ = true
@@ -26,7 +26,7 @@ repeat_times = 4
 metadata/_edit_lock_ = true
 
 [node name="TownBackdrop" type="Sprite2D" parent="TownParallax" unique_id=1248598849]
-position = Vector2(605, 213)
+position = Vector2(960, 213)
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("1_vsh2u")
 centered = false
@@ -37,7 +37,7 @@ offset_top = 483.0
 offset_right = 983.6304
 offset_bottom = 520.2175
 scale = Vector2(40.62565, 16.040813)
-color = Color(0.22773561, 0.11692538, 4.813075e-08, 1)
+color = Color(0.38243625, 0.21238127, 9.62615e-08, 1)
 
 [node name="HQ" type="Sprite2D" parent="." unique_id=878772379]
 position = Vector2(521, 404)
@@ -92,9 +92,6 @@ offset_bottom = 1076.0
 scale = Vector2(0.96, 1)
 text = "Call Biplane Air Support (120 War Bonds)"
 
-[node name="FieldArtillery" parent="." unique_id=392801141 instance=ExtResource("6_y8d5v")]
-position = Vector2(1078, 908)
-
 [node name="Lanes" type="Node2D" parent="." unique_id=1440200053]
 y_sort_enabled = true
 
@@ -106,3 +103,8 @@ position = Vector2(0, 750)
 
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
 position = Vector2(0, 950)
+
+[node name="Fieldartillery" type="Sprite2D" parent="." unique_id=1456296244]
+position = Vector2(1149, 756)
+scale = Vector2(0.3, 0.3)
+texture = ExtResource("8_ki6g1")

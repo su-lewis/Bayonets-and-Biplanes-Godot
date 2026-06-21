@@ -34,15 +34,14 @@ func spawn_soldier():
 	new_soldier.target_lane_y = chosen_lane.global_position.y
 	new_soldier.start_x = $Marker2D.global_position.x
 	
-	# --- THE FIXED SCALE ASSIGNMENT ---
-	var BASE_SCALE = 0.2
+	var BASE_SCALE = 0.3 # <--- Set this to your Sprite's exact starting scale!
 	
 	if chosen_lane == top_lane:
-		new_soldier.target_scale = BASE_SCALE * 0.9  # Shrinks to 0.12
+		new_soldier.target_scale = BASE_SCALE * 0.9  
 	elif chosen_lane == mid_lane:
-		new_soldier.target_scale = BASE_SCALE * 0.95  # Shrinks to 0.135
+		new_soldier.target_scale = BASE_SCALE * 0.95 
 	else:
-		new_soldier.target_scale = BASE_SCALE * 1.0  # Stays at 0.15
+		new_soldier.target_scale = BASE_SCALE * 1.0
 
 # --- BIPLANE SPAWNING logic ---
 func _on_plane_button_pressed():
