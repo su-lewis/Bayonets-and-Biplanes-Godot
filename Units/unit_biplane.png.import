@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8wjt5ur5tie"
-path="res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"
+uid="uid://bmf87him7ruo0"
+path="res://.godot/imported/unit_biplane.png-59bb2e48f9f8d15d2d082486fb3198fd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/c.jpg"
-dest_files=["res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"]
+source_file="res://Units/unit_biplane.png"
+dest_files=["res://.godot/imported/unit_biplane.png-59bb2e48f9f8d15d2d082486fb3198fd.ctex"]
 
 [params]
 

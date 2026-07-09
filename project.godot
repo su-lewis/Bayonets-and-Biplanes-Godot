@@ -17,15 +17,20 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GameManager="*uid://d2sm7ut3rgwoy"
+GameManager="*uid://bhi7u66svq500"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=4
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[layer_names]
+
+2d_render/layer_1="GroundUnits"
+2d_render/layer_2="AirUnits"
+2d_render/layer_3="Enemies"
 
 [physics]
 

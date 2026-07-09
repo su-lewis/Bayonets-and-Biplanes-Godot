@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8wjt5ur5tie"
-path="res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"
+uid="uid://cvc3myxwd7of5"
+path="res://.godot/imported/barracks_spawner_exterior.png-3317b26a0a66817928d45087a13c6758.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/c.jpg"
-dest_files=["res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"]
+source_file="res://Assets/barracks_spawner_exterior.png"
+dest_files=["res://.godot/imported/barracks_spawner_exterior.png-3317b26a0a66817928d45087a13c6758.ctex"]
 
 [params]
 

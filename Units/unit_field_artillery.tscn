@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://c2ovm003k25k0"]
+
+[ext_resource type="Texture2D" uid="uid://bsdj5hhcvfyk5" path="res://Units/unit_field_artillery.png" id="1_6mnbk"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pwc6b"]
+size = Vector2(824, 600)
+
+[node name="FieldArtillery" type="CharacterBody2D" unique_id=1767814278]
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1029760055]
+position = Vector2(11, -128)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("1_6mnbk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1666978023]
+position = Vector2(5, -75)
+scale = Vector2(0.25, 0.25)
+shape = SubResource("RectangleShape2D_pwc6b")

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8wjt5ur5tie"
-path="res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"
+uid="uid://bsdj5hhcvfyk5"
+path="res://.godot/imported/unit_field_artillery.png-c192cd65ce45d7b336308407ea077d17.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/c.jpg"
-dest_files=["res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"]
+source_file="res://Units/unit_field_artillery.png"
+dest_files=["res://.godot/imported/unit_field_artillery.png-c192cd65ce45d7b336308407ea077d17.ctex"]
 
 [params]
 

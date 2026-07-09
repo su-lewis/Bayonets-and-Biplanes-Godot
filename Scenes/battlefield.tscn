@@ -1,0 +1,141 @@
+[gd_scene format=3 uid="uid://buiaupgdov2rt"]
+
+[ext_resource type="Texture2D" uid="uid://dh1luj06achlo" path="res://Assets/factory_spawner_exterior.png" id="2_y8rib"]
+[ext_resource type="Script" uid="uid://bqsc3d42487od" path="res://Scripts/canvas_layer.gd" id="3_fxwnf"]
+[ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_controller.gd" id="3_tkjg1"]
+[ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="3_vsh2u"]
+[ext_resource type="Texture2D" uid="uid://cvc3myxwd7of5" path="res://Assets/barracks_spawner_exterior.png" id="4_4eiu0"]
+[ext_resource type="Texture2D" uid="uid://bcp2lm56nmrcd" path="res://Assets/factory_spawner_interior.png" id="4_ki6g1"]
+[ext_resource type="Texture2D" uid="uid://ckkubnur7m6o1" path="res://Assets/barracks_spawner_interior.png" id="6_ki6g1"]
+[ext_resource type="Texture2D" uid="uid://bsdj5hhcvfyk5" path="res://Units/unit_field_artillery.png" id="8_4eiu0"]
+
+[node name="Battlefield" type="Node2D" unique_id=1725853040]
+metadata/_edit_lock_ = true
+
+[node name="SkyParallax" type="Parallax2D" parent="." unique_id=1045096618]
+scroll_scale = Vector2(0.008, 0.008)
+
+[node name="SkyDay" type="Sprite2D" parent="SkyParallax" unique_id=220661090]
+z_index = -1
+position = Vector2(-7.6293945e-06, -2.861023e-06)
+scale = Vector2(31.593748, 7.5468755)
+centered = false
+
+[node name="TownParallax" type="Parallax2D" parent="." unique_id=298040615]
+scroll_scale = Vector2(0.01, 0.01)
+repeat_size = Vector2(480, 0)
+repeat_times = 4
+metadata/_edit_lock_ = true
+
+[node name="TownBackdrop" type="Sprite2D" parent="TownParallax" unique_id=1248598849]
+position = Vector2(960, 213)
+scale = Vector2(0.25, 0.25)
+centered = false
+
+[node name="Ground" type="ColorRect" parent="TownParallax" unique_id=933642097]
+z_index = -2
+offset_left = 960.0
+offset_top = 483.0
+offset_right = 983.6304
+offset_bottom = 520.2175
+scale = Vector2(40.62565, 16.040813)
+color = Color(0.38243625, 0.21238127, 9.62615e-08, 1)
+
+[node name="Lanes" type="Node2D" parent="." unique_id=1440200053]
+y_sort_enabled = true
+
+[node name="TopLane" type="Node2D" parent="Lanes" unique_id=1140387156]
+position = Vector2(0, 570)
+
+[node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
+position = Vector2(0, 765)
+
+[node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
+position = Vector2(0, 950)
+
+[node name="Factory" type="Sprite2D" parent="." unique_id=878772379 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker")]
+z_as_relative = false
+position = Vector2(499, 358)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("2_y8rib")
+script = ExtResource("3_vsh2u")
+ground_lanes = [NodePath("../Lanes/TopLane"), NodePath("../Lanes/MiddleLane"), NodePath("../Lanes/BottomLane")]
+canvas_layer = NodePath("../CanvasLayer")
+infantry_marker = NodePath("../Barracks/InfantryMarker")
+tank_marker = NodePath("TankMarker")
+plane_marker = NodePath("PlaneMarker")
+
+[node name="PlaneMarker" type="Marker2D" parent="Factory" unique_id=1072361226]
+position = Vector2(-580, -84)
+
+[node name="TankMarker" type="Marker2D" parent="Factory" unique_id=2090271734]
+position = Vector2(-580, 2000)
+
+[node name="Behind" type="Sprite2D" parent="Factory" unique_id=677165705]
+texture = ExtResource("4_ki6g1")
+
+[node name="Barracks" type="Sprite2D" parent="." unique_id=317493857]
+z_as_relative = false
+position = Vector2(1133, 561)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_4eiu0")
+
+[node name="InfantryMarker" type="Marker2D" parent="Barracks" unique_id=1801584774]
+position = Vector2(-268, 932)
+
+[node name="Behind" type="Sprite2D" parent="Barracks" unique_id=1803278059]
+texture = ExtResource("6_ki6g1")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
+scale = Vector2(0.2573564, 0.26329544)
+anchor_mode = 0
+limit_left = 0
+limit_top = 0
+limit_right = 6000
+limit_bottom = 1080
+limit_smoothed = true
+script = ExtResource("3_tkjg1")
+
+[node name="GroundPath" type="StaticBody2D" parent="." unique_id=1577460652]
+visible = false
+position = Vector2(0, -7)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1524907598]
+position = Vector2(1002, 919)
+polygon = PackedVector2Array(6867, 140, 6872, 30, -996, 31, -1001, 146)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1765237454]
+script = ExtResource("3_fxwnf")
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=671423834]
+offset_left = 460.0
+offset_top = 1039.0
+offset_right = 500.0
+offset_bottom = 1062.0
+
+[node name="RiflemanButton" type="Button" parent="CanvasLayer" unique_id=563773558]
+offset_left = 572.0
+offset_top = 1016.0
+offset_right = 810.0
+offset_bottom = 1076.0
+text = "Spawn Soldier (75 War Bonds)"
+
+[node name="TankButton" type="Button" parent="CanvasLayer" unique_id=1739292699]
+offset_left = 1126.0
+offset_top = 1016.0
+offset_right = 1364.0
+offset_bottom = 1076.0
+text = "Spawn Tank (250 War Bonds)"
+
+[node name="PlaneButton" type="Button" parent="CanvasLayer" unique_id=1029574734]
+offset_left = 814.0
+offset_top = 1016.0
+offset_right = 1135.0
+offset_bottom = 1076.0
+scale = Vector2(0.96, 1)
+text = "Call Biplane Air Support (120 War Bonds)"
+
+[node name="Fieldartillery" type="Sprite2D" parent="." unique_id=1456296244]
+position = Vector2(1443, 641)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("8_4eiu0")

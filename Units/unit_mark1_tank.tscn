@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bfx6456gepaec"]
+
+[ext_resource type="Script" uid="uid://ds4up1g0yvdwa" path="res://Units/unit_mark1_tank.gd" id="1_hbelr"]
+[ext_resource type="Texture2D" uid="uid://cp4rcfhnpqj3f" path="res://Units/unit_mark1_tank.png" id="3_h6mu2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_uaeut"]
+size = Vector2(504, 171)
+
+[node name="Tank" type="CharacterBody2D" unique_id=112666923]
+script = ExtResource("1_hbelr")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=437064525]
+position = Vector2(-62, -249)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("3_h6mu2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=282502782]
+position = Vector2(15, -85.5)
+shape = SubResource("RectangleShape2D_uaeut")

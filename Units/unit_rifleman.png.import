@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8wjt5ur5tie"
-path="res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"
+uid="uid://d2t0wfh2ssm5h"
+path="res://.godot/imported/unit_rifleman.png-1e76420c7a46296304ee401a46ed38b9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/c.jpg"
-dest_files=["res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"]
+source_file="res://Units/unit_rifleman.png"
+dest_files=["res://.godot/imported/unit_rifleman.png-1e76420c7a46296304ee401a46ed38b9.ctex"]
 
 [params]
 

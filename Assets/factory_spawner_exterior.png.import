@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bg8wjt5ur5tie"
-path="res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"
+uid="uid://dh1luj06achlo"
+path="res://.godot/imported/factory_spawner_exterior.png-d13e0785b71c60816cf1556756bca1ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/c.jpg"
-dest_files=["res://.godot/imported/c.jpg-857d8e6f2b806fd9bbcf56868da35b10.ctex"]
+source_file="res://Assets/factory_spawner_exterior.png"
+dest_files=["res://.godot/imported/factory_spawner_exterior.png-d13e0785b71c60816cf1556756bca1ba.ctex"]
 
 [params]
 
