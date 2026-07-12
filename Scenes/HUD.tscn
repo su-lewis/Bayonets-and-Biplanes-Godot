@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://byjlil1ks0v0v"]
+
+[ext_resource type="Script" uid="uid://bqsc3d42487od" path="res://Scripts/canvas_layer.gd" id="1_sd512"]
+
+[node name="CanvasLayer" type="CanvasLayer" unique_id=1251239764]
+script = ExtResource("1_sd512")
+
+[node name="Label" type="Label" parent="." unique_id=30428898]
+offset_left = 460.0
+offset_top = 1039.0
+offset_right = 500.0
+offset_bottom = 1062.0
+
+[node name="RiflemanButton" type="Button" parent="." unique_id=1981003162]
+offset_left = 572.0
+offset_top = 1016.0
+offset_right = 810.0
+offset_bottom = 1076.0
+text = "Spawn Soldier (75 War Bonds)"
+
+[node name="TankButton" type="Button" parent="." unique_id=1696888547]
+offset_left = 1126.0
+offset_top = 1016.0
+offset_right = 1364.0
+offset_bottom = 1076.0
+text = "Spawn Tank (250 War Bonds)"
+
+[node name="PlaneButton" type="Button" parent="." unique_id=1083310906]
+offset_left = 814.0
+offset_top = 1016.0
+offset_right = 1135.0
+offset_bottom = 1076.0
+scale = Vector2(0.96, 1)
+text = "Call Biplane Air Support (120 War Bonds)"
