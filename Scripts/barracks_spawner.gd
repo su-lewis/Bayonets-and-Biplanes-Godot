@@ -32,20 +32,23 @@ func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, send_to_back: 
 	var chosen_lane = ground_lanes.pick_random()
 	
 	chosen_lane.add_child(new_unit)
-	if send_to_back:
-		chosen_lane.move_child(new_unit, 0)
-		
-	new_unit.z_index = 0
-	if new_unit.has_node("Sprite2D"):
-		new_unit.get_node("Sprite2D").z_index = 0
 		
 	new_unit.global_position = spawn_point.global_position
 	new_unit.target_lane_y = chosen_lane.global_position.y
 	new_unit.start_x = spawn_point.global_position.x 
 	
-	var lane_index = ground_lanes.find(chosen_lane)
-	var scale_multipliers = [0.9, 0.95, 1.0]
-	new_unit.target_scale = new_unit.base_scale * scale_multipliers[lane_index]
+	var min_scale: float = 0.75 # The scale for the very top lane (Adjust if still too small!)
+	var max_scale: float = 1.0  # The scale for the very bottom lane
+	var min_y: float = 570.0    # Top lane Y
+	var max_y: float = 950.0    # Bottom lane Y
+
+	# This finds out how far down the screen the unit is, from 0.0 (top) to 1.0 (bottom)
+	var weight: float = (chosen_lane.global_position.y - min_y) / (max_y - min_y)
+
+	# This smoothly blends between 0.75 and 1.0 based on that weight
+	var perspective_scale: float = lerp(min_scale, max_scale, weight)
+
+	new_unit.target_scale = new_unit.base_scale * perspective_scale
 
 func spawn_biplane() -> void:
 	var new_plane = biplane_scene.instantiate()

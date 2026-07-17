@@ -47,7 +47,7 @@ y_sort_enabled = true
 position = Vector2(0, 570)
 
 [node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
-position = Vector2(0, 765)
+position = Vector2(0, 746)
 
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
 position = Vector2(0, 950)
