@@ -1,20 +1,20 @@
 [gd_scene format=3 uid="uid://btyrqyd1nqxh4"]
 
 [ext_resource type="Script" uid="uid://b3nrsh4tkbf1j" path="res://Units/unit_biplane.gd" id="1_5h7g4"]
-[ext_resource type="Texture2D" uid="uid://b2gjntwnwwoo2" path="res://Units/unit_biplane.png" id="2_3hadi"]
+[ext_resource type="Texture2D" uid="uid://bmf87him7ruo0" path="res://Units/unit_biplane.png" id="2_3hadi"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_87ivd"]
-size = Vector2(313, 143)
+size = Vector2(270, 124.5)
 
 [node name="Biplane" type="CharacterBody2D" unique_id=1701208706]
 collision_layer = 4
 script = ExtResource("1_5h7g4")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2137148591]
-position = Vector2(-15, -71.00001)
-scale = Vector2(0.17, 0.17)
+scale = Vector2(0.15, 0.15)
 texture = ExtResource("2_3hadi")
+offset = Vector2(0, -417)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=190208181]
-position = Vector2(-22.5, -71.5)
+position = Vector2(-9, -62.75)
 shape = SubResource("RectangleShape2D_87ivd")

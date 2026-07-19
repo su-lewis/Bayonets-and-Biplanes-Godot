@@ -16,9 +16,7 @@ var current_state: State = State.ROLLOUT
 @onready var sprite: Sprite2D = $Sprite2D
 
 func _ready() -> void:
-	# PHYSICS SETUP:
-	# collision_layer = 2 (I am a Unit)
-	# collision_mask = 1 (I bump into Environment/Craters on layer 1, but NOT other units on layer 2)
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	collision_layer = 2
 	collision_mask = 1
 	
@@ -36,16 +34,6 @@ func _physics_process(delta: float) -> void:
 				
 		State.DIAGONAL_PUSH:
 			var distance_to_lane = target_lane_y - global_position.y
-			var y_step_this_frame = (move_speed * 0.8) * delta
-			
-			# JITTER FIX: If we are going to overshoot the lane this frame, snap perfectly to it.
-			if abs(distance_to_lane) <= y_step_this_frame:
-				global_position.y = target_lane_y
-				velocity = Vector2(move_speed, 0)
-				current_state = State.LANE_PUSH
-			else:
-				velocity.x = move_speed
-				velocity.y = (move_speed * 0.8) * sign(distance_to_lane)
 			
 			# Smooth Scaling
 			var total_y_distance = target_lane_y - start_y_for_scale
@@ -55,9 +43,21 @@ func _physics_process(delta: float) -> void:
 				var current_scale = lerp(base_scale, target_scale, progress)
 				if sprite:
 					sprite.scale = Vector2(current_scale, current_scale)
-					
+			
+			var move_dir = Vector2(1.0, 0.8 * sign(distance_to_lane)).normalized()
+			var y_step_this_frame = abs(move_dir.y * move_speed) * delta
+			
+			# JITTER FIX: Overshoot snap
+			if abs(distance_to_lane) <= y_step_this_frame:
+				current_state = State.LANE_PUSH
+			else:
+				velocity = move_dir * move_speed
+				
 		State.LANE_PUSH:
 			velocity = Vector2(move_speed, 0)
+			# FORCE LOCK the Y-axis and Scale so it stops jittering/drifting!
+			global_position.y = target_lane_y
+			if sprite:
+				sprite.scale = Vector2(target_scale, target_scale)
 
-	# Apply Godot's physics (allowing interaction with craters/holes)
 	move_and_slide()
