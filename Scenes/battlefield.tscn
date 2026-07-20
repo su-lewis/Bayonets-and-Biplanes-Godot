@@ -99,12 +99,4 @@ limit_bottom = 1080
 limit_smoothed = true
 script = ExtResource("3_tkjg1")
 
-[node name="GroundPath" type="StaticBody2D" parent="." unique_id=1577460652]
-visible = false
-position = Vector2(0, -7)
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="GroundPath" unique_id=1524907598]
-position = Vector2(1002, 919)
-polygon = PackedVector2Array(6867, 140, 6872, 30, -996, 31, -1001, 146)
-
 [node name="CanvasLayer" parent="." unique_id=1251239764 instance=ExtResource("7_xr3kp")]

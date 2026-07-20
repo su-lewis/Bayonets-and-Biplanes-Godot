@@ -43,7 +43,6 @@ func _try_buy(cost: int, success_action: Callable) -> void:
 	else:
 		print("Not enough pigeons! Need: ", cost)
 
-# Change the spawn_unit function header to this:
 func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team: bool = false) -> void:
 	var new_unit = scene_to_spawn.instantiate()
 	

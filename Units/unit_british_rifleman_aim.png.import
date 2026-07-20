@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d2t0wfh2ssm5h"
-path="res://.godot/imported/unit_rifleman.png-1e76420c7a46296304ee401a46ed38b9.ctex"
+uid="uid://cloxc486eli66"
+path="res://.godot/imported/unit_british_rifleman_aim.png-91bc7e018b6ce22ef2711e071e0102a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Units/unit_rifleman.png"
-dest_files=["res://.godot/imported/unit_rifleman.png-1e76420c7a46296304ee401a46ed38b9.ctex"]
+source_file="res://Units/unit_british_rifleman_aim.png"
+dest_files=["res://.godot/imported/unit_british_rifleman_aim.png-91bc7e018b6ce22ef2711e071e0102a3.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
