@@ -10,6 +10,7 @@ var tank_scene: PackedScene = preload("res://Units/unit_mark1_tank.tscn")
 @export var infantry_marker: Marker2D
 @export var tank_marker: Marker2D
 @export var plane_marker: Marker2D
+@export var enemy_marker: Marker2D
 
 # NEW VARIABLES FOR LANE CYCLING
 var ordered_lanes: Array[Node2D] = []
@@ -27,7 +28,14 @@ func _ready() -> void:
 	# Connect the buttons
 	canvas_layer.get_node("RiflemanButton").pressed.connect(_try_buy.bind(75, spawn_unit.bind(soldier_scene, infantry_marker, false)))
 	canvas_layer.get_node("PlaneButton").pressed.connect(_try_buy.bind(120, spawn_biplane))
-	canvas_layer.get_node("TankButton").pressed.connect(_try_buy.bind(250, spawn_unit.bind(tank_scene, tank_marker, true)))
+	canvas_layer.get_node("TankButton").pressed.connect(_try_buy.bind(250, spawn_unit.bind(tank_scene, tank_marker, false)))
+
+# Test Enemy Spawner!
+	var enemy_timer = Timer.new()
+	enemy_timer.wait_time = 5.0
+	enemy_timer.autostart = true
+	enemy_timer.timeout.connect(spawn_unit.bind(soldier_scene, enemy_marker, true))
+	add_child(enemy_timer)
 
 func _try_buy(cost: int, success_action: Callable) -> void:
 	if GameManager.spend_pigeons(cost):
@@ -35,13 +43,14 @@ func _try_buy(cost: int, success_action: Callable) -> void:
 	else:
 		print("Not enough pigeons! Need: ", cost)
 
-func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, send_to_back: bool = false) -> void:
+# Change the spawn_unit function header to this:
+func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team: bool = false) -> void:
 	var new_unit = scene_to_spawn.instantiate()
 	
-	# NEW: Pick lane sequentially instead of random
-	var chosen_lane = ordered_lanes[current_lane_index]
+	# Set the team BEFORE adding it to the scene tree
+	new_unit.is_enemy = is_enemy_team 
 	
-	# Increment index, and wrap around back to 0 if it exceeds the array size
+	var chosen_lane = ordered_lanes[current_lane_index]
 	current_lane_index = (current_lane_index + 1) % ordered_lanes.size()
 	
 	chosen_lane.add_child(new_unit)
@@ -50,10 +59,10 @@ func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, send_to_back: 
 	new_unit.target_lane_y = chosen_lane.global_position.y
 	new_unit.start_x = spawn_point.global_position.x 
 	
-	var min_scale: float = 0.75 # The scale for the very top lane
-	var max_scale: float = 1.0  # The scale for the very bottom lane
-	var min_y: float = 570.0    # Top lane Y
-	var max_y: float = 950.0    # Bottom lane Y
+	var min_scale: float = 0.75 
+	var max_scale: float = 1.0  
+	var min_y: float = 570.0    
+	var max_y: float = 950.0    
 
 	var weight: float = (chosen_lane.global_position.y - min_y) / (max_y - min_y)
 	var perspective_scale: float = lerp(min_scale, max_scale, weight)

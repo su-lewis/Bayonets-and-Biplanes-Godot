@@ -52,7 +52,7 @@ position = Vector2(0, 746)
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
 position = Vector2(0, 950)
 
-[node name="Factory" type="Sprite2D" parent="." unique_id=878772379 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker")]
+[node name="Factory" type="Sprite2D" parent="." unique_id=878772379 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker", "enemy_marker")]
 z_as_relative = false
 position = Vector2(499, 358)
 scale = Vector2(0.25, 0.25)
@@ -63,6 +63,7 @@ canvas_layer = NodePath("../CanvasLayer")
 infantry_marker = NodePath("../Barracks/InfantryMarker")
 tank_marker = NodePath("TankMarker")
 plane_marker = NodePath("PlaneMarker")
+enemy_marker = NodePath("../Barracks/EnemySpawnMarker")
 
 [node name="PlaneMarker" type="Marker2D" parent="Factory" unique_id=1072361226]
 position = Vector2(-580, -84)
@@ -84,6 +85,9 @@ position = Vector2(-268, 932)
 
 [node name="Behind" type="Sprite2D" parent="Barracks" unique_id=1803278059]
 texture = ExtResource("6_ki6g1")
+
+[node name="EnemySpawnMarker" type="Marker2D" parent="Barracks" unique_id=1369628517]
+position = Vector2(19712, 0)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
 scale = Vector2(0.2573564, 0.26329544)
