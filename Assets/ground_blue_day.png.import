@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ic647rfdaut3"
-path="res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"
+uid="uid://dh848jxn0j0yg"
+path="res://.godot/imported/ground_blue_day.png-4ae25afb70aaf5ca9c060c534a4d3e6a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/images.jpg"
-dest_files=["res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"]
+source_file="res://Assets/ground_blue_day.png"
+dest_files=["res://.godot/imported/ground_blue_day.png-4ae25afb70aaf5ca9c060c534a4d3e6a.ctex"]
 
 [params]
 

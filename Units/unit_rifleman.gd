@@ -9,7 +9,7 @@ func _ready() -> void:
 	damage = 15.0
 	attack_cooldown = 1.0 # Shoots fast
 	move_speed = 50.0 # Walks fast
-	walk_out_distance = 400.0
+	walk_out_distance = 1200.0
 	
 	armor_type = ArmorType.LIGHT
 	damage_type = DamageType.BULLET

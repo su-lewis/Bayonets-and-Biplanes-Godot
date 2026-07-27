@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ic647rfdaut3"
-path="res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"
+uid="uid://cafsxh37516m"
+path="res://.godot/imported/barracks_british.png-84201d60ab78d3733b3b19532b551f80.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/images.jpg"
-dest_files=["res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"]
+source_file="res://Assets/barracks_british.png"
+dest_files=["res://.godot/imported/barracks_british.png-84201d60ab78d3733b3b19532b551f80.ctex"]
 
 [params]
 

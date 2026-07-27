@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ic647rfdaut3"
-path="res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"
+uid="uid://bpigqeiuy86un"
+path="res://.godot/imported/factory_british.png-a0fea63e1c51b6b7fe752939e42bb5d3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Artstyle inspiration/images.jpg"
-dest_files=["res://.godot/imported/images.jpg-7f41238156e21b62e435af9ea4b37503.ctex"]
+source_file="res://Assets/factory_british.png"
+dest_files=["res://.godot/imported/factory_british.png-a0fea63e1c51b6b7fe752939e42bb5d3.ctex"]
 
 [params]
 

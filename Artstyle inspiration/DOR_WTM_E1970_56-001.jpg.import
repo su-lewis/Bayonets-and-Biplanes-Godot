@@ -2,7 +2,7 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://df7imqly8ag2w"
+uid="uid://cwm5n1aafnvrl"
 path="res://.godot/imported/DOR_WTM_E1970_56-001.jpg-c0d0f48dc1ce9b1be17579e2e75ae461.ctex"
 metadata={
 "vram_texture": false
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""

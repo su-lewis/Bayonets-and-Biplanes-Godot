@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://buiaupgdov2rt"]
 
-[ext_resource type="Texture2D" uid="uid://dh1luj06achlo" path="res://Assets/factory_spawner_exterior.png" id="2_y8rib"]
+[ext_resource type="Texture2D" uid="uid://bpigqeiuy86un" path="res://Assets/factory_british.png" id="1_fc4l0"]
+[ext_resource type="Texture2D" uid="uid://d4h2ura5c2ocj" path="res://Assets/sky_blue_day.png" id="1_y3su5"]
+[ext_resource type="Texture2D" uid="uid://dh848jxn0j0yg" path="res://Assets/ground_blue_day.png" id="2_y3su5"]
 [ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_controller.gd" id="3_tkjg1"]
 [ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="3_vsh2u"]
-[ext_resource type="Texture2D" uid="uid://cvc3myxwd7of5" path="res://Assets/barracks_spawner_exterior.png" id="4_4eiu0"]
+[ext_resource type="Texture2D" uid="uid://cafsxh37516m" path="res://Assets/barracks_british.png" id="4_fc4l0"]
 [ext_resource type="Texture2D" uid="uid://bcp2lm56nmrcd" path="res://Assets/factory_spawner_interior.png" id="4_ki6g1"]
 [ext_resource type="Texture2D" uid="uid://ckkubnur7m6o1" path="res://Assets/barracks_spawner_interior.png" id="6_ki6g1"]
 [ext_resource type="PackedScene" uid="uid://byjlil1ks0v0v" path="res://Scenes/HUD.tscn" id="7_xr3kp"]
@@ -12,33 +14,37 @@
 metadata/_edit_lock_ = true
 
 [node name="SkyParallax" type="Parallax2D" parent="." unique_id=1045096618]
+z_index = -2
 scroll_scale = Vector2(0.008, 0.008)
+repeat_size = Vector2(1920, 0)
 
 [node name="SkyDay" type="Sprite2D" parent="SkyParallax" unique_id=220661090]
 z_index = -1
-position = Vector2(-7.6293945e-06, -2.861023e-06)
-scale = Vector2(31.593748, 7.5468755)
+position = Vector2(0, -2.861023e-06)
+scale = Vector2(0.5009259, 0.5)
+texture = ExtResource("1_y3su5")
 centered = false
 
+[node name="Ground" type="TextureRect" parent="." unique_id=1376213414]
+z_index = -2
+texture_repeat = 2
+offset_top = -3.0517578e-05
+offset_right = 5907.693
+offset_bottom = 3323.0771
+scale = Vector2(0.325, 0.325)
+texture = ExtResource("2_y3su5")
+flip_h = true
+
 [node name="TownParallax" type="Parallax2D" parent="." unique_id=298040615]
+visible = false
 scroll_scale = Vector2(0.01, 0.01)
 repeat_size = Vector2(480, 0)
 repeat_times = 4
-metadata/_edit_lock_ = true
 
 [node name="TownBackdrop" type="Sprite2D" parent="TownParallax" unique_id=1248598849]
 position = Vector2(960, 213)
 scale = Vector2(0.25, 0.25)
 centered = false
-
-[node name="Ground" type="ColorRect" parent="TownParallax" unique_id=933642097]
-z_index = -2
-offset_left = 960.0
-offset_top = 483.0
-offset_right = 983.6304
-offset_bottom = 520.2175
-scale = Vector2(40.62565, 16.040813)
-color = Color(0.38243625, 0.21238127, 9.62615e-08, 1)
 
 [node name="Lanes" type="Node2D" parent="." unique_id=1440200053]
 y_sort_enabled = true
@@ -52,11 +58,17 @@ position = Vector2(0, 746)
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
 position = Vector2(0, 950)
 
+[node name="LowSky" type="Node2D" parent="Lanes" unique_id=418360194]
+position = Vector2(354, 337)
+
+[node name="HighSky" type="Node2D" parent="Lanes" unique_id=567414128]
+position = Vector2(354, 119)
+
 [node name="Factory" type="Sprite2D" parent="." unique_id=878772379 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker", "enemy_marker")]
 z_as_relative = false
-position = Vector2(499, 358)
-scale = Vector2(0.25, 0.25)
-texture = ExtResource("2_y8rib")
+position = Vector2(752.99994, 364)
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("1_fc4l0")
 script = ExtResource("3_vsh2u")
 ground_lanes = [NodePath("../Lanes/TopLane"), NodePath("../Lanes/MiddleLane"), NodePath("../Lanes/BottomLane")]
 canvas_layer = NodePath("../CanvasLayer")
@@ -66,24 +78,26 @@ plane_marker = NodePath("PlaneMarker")
 enemy_marker = NodePath("../Barracks/EnemySpawnMarker")
 
 [node name="PlaneMarker" type="Marker2D" parent="Factory" unique_id=1072361226]
-position = Vector2(-580, -84)
+position = Vector2(738.18176, -49.090923)
 
 [node name="TankMarker" type="Marker2D" parent="Factory" unique_id=2090271734]
-position = Vector2(-580, 2000)
+position = Vector2(185.71426, 637.7777)
 
 [node name="Behind" type="Sprite2D" parent="Factory" unique_id=677165705]
+visible = false
 texture = ExtResource("4_ki6g1")
 
 [node name="Barracks" type="Sprite2D" parent="." unique_id=317493857]
 z_as_relative = false
-position = Vector2(1133, 561)
+position = Vector2(380, 833)
 scale = Vector2(0.25, 0.25)
-texture = ExtResource("4_4eiu0")
+texture = ExtResource("4_fc4l0")
 
 [node name="InfantryMarker" type="Marker2D" parent="Barracks" unique_id=1801584774]
-position = Vector2(-268, 932)
+position = Vector2(-40, 612)
 
 [node name="Behind" type="Sprite2D" parent="Barracks" unique_id=1803278059]
+visible = false
 texture = ExtResource("6_ki6g1")
 
 [node name="EnemySpawnMarker" type="Marker2D" parent="Barracks" unique_id=1369628517]
