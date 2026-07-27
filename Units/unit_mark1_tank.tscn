@@ -4,10 +4,10 @@
 [ext_resource type="Texture2D" uid="uid://bol5ga44uplqf" path="res://Units/unit_british_tank.png" id="2_c6epr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uaeut"]
-size = Vector2(747, 181.5)
+size = Vector2(744, 176)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oamna"]
-size = Vector2(801, 130)
+size = Vector2(730.5, 130)
 
 [node name="Tank" type="CharacterBody2D" unique_id=112666923]
 collision_layer = 2
@@ -16,10 +16,10 @@ script = ExtResource("1_hbelr")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=437064525]
 scale = Vector2(0.25, 0.25)
 texture = ExtResource("2_c6epr")
-offset = Vector2(-972.46, -1000)
+offset = Vector2(-225, -990)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=282502782]
-position = Vector2(-243.5, -91.25)
+position = Vector2(-56, -88)
 shape = SubResource("RectangleShape2D_uaeut")
 
 [node name="AttackRange" type="Area2D" parent="." unique_id=1929358941]
@@ -28,5 +28,5 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=1393200195]
-position = Vector2(724.5, -68)
+position = Vector2(859, -126)
 shape = SubResource("RectangleShape2D_oamna")

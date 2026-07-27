@@ -4,7 +4,7 @@ var soldier_scene: PackedScene = preload("res://Units/unit_rifleman.tscn")
 var biplane_scene: PackedScene = preload("res://Units/unit_biplane.tscn")
 var tank_scene: PackedScene = preload("res://Units/unit_mark1_tank.tscn")
 
-# Drag these in from the Inspector!
+# Inspector assignments
 @export var ground_lanes: Array[Node2D] = []
 @export var canvas_layer: CanvasLayer
 @export var infantry_marker: Marker2D
@@ -12,7 +12,6 @@ var tank_scene: PackedScene = preload("res://Units/unit_mark1_tank.tscn")
 @export var plane_marker: Marker2D
 @export var enemy_marker: Marker2D
 
-# NEW VARIABLES FOR LANE CYCLING
 var ordered_lanes: Array[Node2D] = []
 var current_lane_index: int = 0
 
@@ -21,16 +20,16 @@ func _ready() -> void:
 		push_error("Canvas Layer not assigned in inspector!")
 		return
 
-	# Set up sequential lanes (Sorts them by Y position: Bottom -> Middle -> Top)
+	# Sort lanes by Y position (Bottom -> Middle -> Top)
 	ordered_lanes = ground_lanes.duplicate()
 	ordered_lanes.sort_custom(func(a, b): return a.global_position.y > b.global_position.y)
 
-	# Connect the buttons
+	# Connect buttons
 	canvas_layer.get_node("RiflemanButton").pressed.connect(_try_buy.bind(75, spawn_unit.bind(soldier_scene, infantry_marker, false)))
 	canvas_layer.get_node("PlaneButton").pressed.connect(_try_buy.bind(120, spawn_biplane))
 	canvas_layer.get_node("TankButton").pressed.connect(_try_buy.bind(250, spawn_unit.bind(tank_scene, tank_marker, false)))
 
-# Test Enemy Spawner!
+	# Test Enemy Spawner
 	var enemy_timer = Timer.new()
 	enemy_timer.wait_time = 5.0
 	enemy_timer.autostart = true
@@ -45,8 +44,6 @@ func _try_buy(cost: int, success_action: Callable) -> void:
 
 func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team: bool = false) -> void:
 	var new_unit = scene_to_spawn.instantiate()
-	
-	# Set the team BEFORE adding it to the scene tree
 	new_unit.is_enemy = is_enemy_team 
 	
 	var chosen_lane = ordered_lanes[current_lane_index]
@@ -58,12 +55,13 @@ func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team:
 	new_unit.target_lane_y = chosen_lane.global_position.y
 	new_unit.start_x = spawn_point.global_position.x 
 	
-	var min_scale: float = 0.75 
-	var max_scale: float = 1.0  
-	var min_y: float = 570.0    
-	var max_y: float = 950.0    
+	# --- RECALCULATED FOR 990 FLOOR LIMIT ---
+	var min_scale: float = 0.75  # TopLane
+	var max_scale: float = 1.00  # BottomLane
+	var min_y: float = 570.0     # TopLane Y
+	var max_y: float = 930.0     # BottomLane Y (Recalculated)
 
-	var weight: float = (chosen_lane.global_position.y - min_y) / (max_y - min_y)
+	var weight: float = clamp((chosen_lane.global_position.y - min_y) / (max_y - min_y), 0.0, 1.0)
 	var perspective_scale: float = lerp(min_scale, max_scale, weight)
 
 	new_unit.target_scale = new_unit.base_scale * perspective_scale
@@ -75,7 +73,6 @@ func spawn_biplane() -> void:
 	var base_sky_y: float = plane_marker.global_position.y
 	var final_target_y: float = base_sky_y if sky_tier == 0 else (base_sky_y - 150.0)
 	
-	# Planes can stay visually assigned to a random ground lane since their Y is absolute
 	var visual_sorting_lane = ground_lanes.pick_random()
 	visual_sorting_lane.add_child(new_plane)
 	

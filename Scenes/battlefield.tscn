@@ -2,11 +2,14 @@
 
 [ext_resource type="Texture2D" uid="uid://bpigqeiuy86un" path="res://Assets/factory_british.png" id="1_fc4l0"]
 [ext_resource type="Texture2D" uid="uid://d4h2ura5c2ocj" path="res://Assets/sky_blue_day.png" id="1_y3su5"]
-[ext_resource type="Texture2D" uid="uid://dh848jxn0j0yg" path="res://Assets/ground_blue_day.png" id="2_y3su5"]
+[ext_resource type="Texture2D" uid="uid://c57wdcormt6nc" path="res://Assets/top.png" id="2_y3su5"]
+[ext_resource type="Script" uid="uid://d3dnyfr3moo3e" path="res://Scenes/sync_polygon.gd" id="3_qbwnf"]
 [ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_controller.gd" id="3_tkjg1"]
+[ext_resource type="Texture2D" uid="uid://b0etmq5ad31h4" path="res://Assets/middle.png" id="3_uwhxi"]
 [ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="3_vsh2u"]
 [ext_resource type="Texture2D" uid="uid://cafsxh37516m" path="res://Assets/barracks_british.png" id="4_fc4l0"]
 [ext_resource type="Texture2D" uid="uid://bcp2lm56nmrcd" path="res://Assets/factory_spawner_interior.png" id="4_ki6g1"]
+[ext_resource type="Texture2D" uid="uid://ccvjxommq2i58" path="res://Assets/bottom.png" id="4_qbwnf"]
 [ext_resource type="Texture2D" uid="uid://ckkubnur7m6o1" path="res://Assets/barracks_spawner_interior.png" id="6_ki6g1"]
 [ext_resource type="PackedScene" uid="uid://byjlil1ks0v0v" path="res://Scenes/HUD.tscn" id="7_xr3kp"]
 
@@ -25,16 +28,6 @@ scale = Vector2(0.5009259, 0.5)
 texture = ExtResource("1_y3su5")
 centered = false
 
-[node name="Ground" type="TextureRect" parent="." unique_id=1376213414]
-z_index = -2
-texture_repeat = 2
-offset_top = -3.0517578e-05
-offset_right = 5907.693
-offset_bottom = 3323.0771
-scale = Vector2(0.325, 0.325)
-texture = ExtResource("2_y3su5")
-flip_h = true
-
 [node name="TownParallax" type="Parallax2D" parent="." unique_id=298040615]
 visible = false
 scroll_scale = Vector2(0.01, 0.01)
@@ -52,11 +45,56 @@ y_sort_enabled = true
 [node name="TopLane" type="Node2D" parent="Lanes" unique_id=1140387156]
 position = Vector2(0, 570)
 
+[node name="GroundPhysics" type="StaticBody2D" parent="Lanes/TopLane" unique_id=91100389]
+visible = false
+
+[node name="GroundVisual" type="Polygon2D" parent="Lanes/TopLane/GroundPhysics" unique_id=1881316285]
+texture_repeat = 2
+texture = ExtResource("2_y3su5")
+script = ExtResource("3_qbwnf")
+
+[node name="GroundCollider" type="CollisionPolygon2D" parent="Lanes/TopLane/GroundPhysics" unique_id=1325138639]
+polygon = PackedVector2Array(0, 0, 1920, 2, 1920, 510, 0, 510)
+
+[node name="ColorRect" type="ColorRect" parent="Lanes/TopLane" unique_id=757284429]
+offset_right = 3848.0
+offset_bottom = 45.0
+
 [node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
-position = Vector2(0, 746)
+position = Vector2(0, 750)
+
+[node name="GroundPhysics" type="StaticBody2D" parent="Lanes/MiddleLane" unique_id=1999435727]
+visible = false
+
+[node name="GroundVisual" type="Polygon2D" parent="Lanes/MiddleLane/GroundPhysics" unique_id=238790971]
+texture_repeat = 2
+texture = ExtResource("3_uwhxi")
+script = ExtResource("3_qbwnf")
+
+[node name="GroundCollider" type="CollisionPolygon2D" parent="Lanes/MiddleLane/GroundPhysics" unique_id=720991564]
+polygon = PackedVector2Array(0, 0, 1920, -3, 1920, 334, 0, 334)
+
+[node name="ColorRect" type="ColorRect" parent="Lanes/MiddleLane" unique_id=1607456962]
+offset_right = 3850.0
+offset_bottom = 53.0
 
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
-position = Vector2(0, 950)
+position = Vector2(0, 930)
+
+[node name="GroundPhysics" type="StaticBody2D" parent="Lanes/BottomLane" unique_id=260669433]
+visible = false
+
+[node name="GroundVisual" type="Polygon2D" parent="Lanes/BottomLane/GroundPhysics" unique_id=225453497]
+texture_repeat = 2
+texture = ExtResource("4_qbwnf")
+script = ExtResource("3_qbwnf")
+
+[node name="GroundCollider" type="CollisionPolygon2D" parent="Lanes/BottomLane/GroundPhysics" unique_id=1178006282]
+polygon = PackedVector2Array(0, 0, 1919, -10, 1920, 130, 0, 130)
+
+[node name="ColorRect" type="ColorRect" parent="Lanes/BottomLane" unique_id=1106516958]
+offset_right = 3834.0
+offset_bottom = 60.0
 
 [node name="LowSky" type="Node2D" parent="Lanes" unique_id=418360194]
 position = Vector2(354, 337)
@@ -114,3 +152,11 @@ limit_smoothed = true
 script = ExtResource("3_tkjg1")
 
 [node name="CanvasLayer" parent="." unique_id=1251239764 instance=ExtResource("7_xr3kp")]
+
+[node name="UI top" type="Node2D" parent="." unique_id=1691208733]
+position = Vector2(0, 990)
+
+[node name="ColorRect" type="ColorRect" parent="UI top" unique_id=180069981]
+offset_right = 3839.0
+offset_bottom = 40.0
+color = Color(0, 0, 1, 1)
