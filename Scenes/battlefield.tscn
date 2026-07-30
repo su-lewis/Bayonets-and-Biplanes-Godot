@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://bpigqeiuy86un" path="res://Assets/factory_british.png" id="1_fc4l0"]
 [ext_resource type="Texture2D" uid="uid://d4h2ura5c2ocj" path="res://Assets/sky_blue_day.png" id="1_y3su5"]
 [ext_resource type="Texture2D" uid="uid://c57wdcormt6nc" path="res://Assets/top.png" id="2_y3su5"]
-[ext_resource type="Script" uid="uid://d3dnyfr3moo3e" path="res://Scenes/sync_polygon.gd" id="3_qbwnf"]
+[ext_resource type="Script" path="res://Scenes/sync_polygon.gd" id="3_qbwnf"]
 [ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_controller.gd" id="3_tkjg1"]
 [ext_resource type="Texture2D" uid="uid://b0etmq5ad31h4" path="res://Assets/middle.png" id="3_uwhxi"]
 [ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="3_vsh2u"]
