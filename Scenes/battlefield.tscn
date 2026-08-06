@@ -139,14 +139,13 @@ visible = false
 texture = ExtResource("6_ki6g1")
 
 [node name="EnemySpawnMarker" type="Marker2D" parent="Barracks" unique_id=1369628517]
-position = Vector2(19712, 0)
+position = Vector2(44260, -924)
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
-scale = Vector2(0.2573564, 0.26329544)
 anchor_mode = 0
 limit_left = 0
 limit_top = 0
-limit_right = 6000
+limit_right = 11520
 limit_bottom = 1080
 limit_smoothed = true
 script = ExtResource("3_tkjg1")
