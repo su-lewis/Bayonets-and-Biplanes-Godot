@@ -2,8 +2,8 @@ extends CharacterBody2D
 class_name BaseUnit
 
 enum State { ROLLOUT, DIAGONAL_PUSH, LANE_PUSH, ATTACK }
-enum DamageType { BULLET, EXPLOSIVE }
-enum ArmorType { LIGHT, HEAVY }
+enum DamageType { BULLET, EXPLOSIVE, MELEE, FIRE }
+enum ArmorType { UNARMORED, LIGHT, HEAVY, BUILDING }
 
 @export var max_hp: float = 100.0
 @export var damage: float = 20.0
@@ -32,21 +32,32 @@ var current_target: Node2D = null
 @onready var attack_range: Area2D = $AttackRange 
 
 func _ready() -> void:
-	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING # Prevents falling off map
+	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	current_hp = max_hp
+	
+	# Lock initial spawn position for rollout calculations
+	start_x = global_position.x
+	start_y_for_scale = global_position.y
+	
+	if sprite:
+		base_scale = abs(sprite.scale.x)
 	
 	if is_enemy:
 		move_dir = -1.0
-		if sprite: sprite.flip_h = true
+		# THE FIX: Removed `if sprite: sprite.flip_h = true` to fix moonwalking bug
+		
 		if attack_range:
 			for child in attack_range.get_children():
 				if child is CollisionShape2D:
 					child.position.x *= -1 
 	else:
 		move_dir = 1.0
-	
-	if sprite:
-		base_scale = sprite.scale.x
+
+# THE FIX: Safe scale logic that flips direction cleanly
+func _set_sprite_scale(s: float) -> void:
+	if not sprite: return
+	var sign_x = -1.0 if is_enemy else 1.0
+	sprite.scale = Vector2(s * sign_x, s)
 
 func _find_target() -> void:
 	if not attack_range: return
@@ -103,49 +114,47 @@ func _physics_process(delta: float) -> void:
 		State.ROLLOUT:
 			velocity = Vector2(move_speed * move_dir, 0)
 			
+			# Walk out of building first before turning toward lane
 			if (not is_enemy and global_position.x >= start_x + walk_out_distance) or \
 			   (is_enemy and global_position.x <= start_x - walk_out_distance):
 				start_y_for_scale = global_position.y 
 				current_state = State.DIAGONAL_PUSH
 				
 		State.DIAGONAL_PUSH:
-			# Constant forward horizontal movement
-			velocity = Vector2(move_speed * move_dir, 0)
-			
-			# Fast, responsive vertical glide (Reaches lane in ~2.5 seconds)
+			var y_diff = target_lane_y - global_position.y
 			var vertical_speed = max(move_speed * 2.0, 200.0)
-			global_position.y = move_toward(global_position.y, target_lane_y, vertical_speed * delta)
 			
-			# Smooth perspective scale interpolation
-			var total_y_dist = abs(target_lane_y - start_y_for_scale)
-			if total_y_dist > 0.1:
-				var current_y_dist = abs(global_position.y - start_y_for_scale)
-				var progress = clamp(current_y_dist / total_y_dist, 0.0, 1.0)
-				var current_scale = lerp(base_scale, target_scale, progress)
-				if sprite:
-					sprite.scale = Vector2(current_scale, current_scale)
-			
-			# Arrived at lane height cleanly!
-			if abs(global_position.y - target_lane_y) < 1.0:
+			# THE FIX: Clean lane snapping prevents tank oscillation/bouncing
+			if abs(y_diff) <= vertical_speed * delta:
 				global_position.y = target_lane_y
-				if sprite:
-					sprite.scale = Vector2(target_scale, target_scale)
+				_set_sprite_scale(target_scale)
 				current_state = State.LANE_PUSH
+			else:
+				# Otherwise, move smoothly without the delta division jitter
+				var y_vel = sign(y_diff) * vertical_speed
+				velocity = Vector2(move_speed * move_dir, y_vel)
+				
+				# Smooth perspective scaling
+				var total_y_dist = abs(target_lane_y - start_y_for_scale)
+				if total_y_dist > 0.1:
+					var current_y_dist = abs(global_position.y - start_y_for_scale)
+					var progress = clamp(current_y_dist / total_y_dist, 0.0, 1.0)
+					_set_sprite_scale(lerp(base_scale, target_scale, progress))
 				
 		State.LANE_PUSH:
 			velocity = Vector2(move_speed * move_dir, 0)
-			global_position.y = target_lane_y # Locked to lane height!
 			
-			if sprite:
-				sprite.scale = Vector2(target_scale, target_scale)
-				if sprite is AnimatedSprite2D:
-					sprite.play("walk")
+			# THE FIX: No forced manual Y-position overriding here!
+			_set_sprite_scale(target_scale)
+			
+			if sprite is AnimatedSprite2D and sprite.animation != "walk":
+				sprite.play("walk")
 				
 		State.ATTACK:
 			velocity = Vector2.ZERO 
 			attack_timer -= delta
 			
-			if sprite is AnimatedSprite2D:
+			if sprite is AnimatedSprite2D and sprite.animation != "aim":
 				sprite.play("aim")
 			
 			if attack_timer <= 0.0:
