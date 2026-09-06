@@ -1,0 +1,12 @@
+[gd_scene format=3 uid="uid://dwukwcjpnfk52"]
+
+[node name="TownParallax" type="Parallax2D" unique_id=13792386]
+visible = false
+scroll_scale = Vector2(0.01, 0.01)
+repeat_size = Vector2(480, 0)
+repeat_times = 4
+
+[node name="TownBackdrop" type="Sprite2D" parent="." unique_id=213946980]
+position = Vector2(960, 213)
+scale = Vector2(0.25, 0.25)
+centered = false

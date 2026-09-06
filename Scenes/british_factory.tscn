@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://wv5sw6af01mr"]
+
+[ext_resource type="Texture2D" uid="uid://bpigqeiuy86un" path="res://Assets/factory_british.png" id="1_0vuhr"]
+[ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="2_7a8by"]
+[ext_resource type="Texture2D" uid="uid://bcp2lm56nmrcd" path="res://Assets/factory_spawner_interior.png" id="3_kswup"]
+
+[node name="Factory" type="Sprite2D" unique_id=462115179 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker", "enemy_marker")]
+z_as_relative = false
+scale = Vector2(0.55, 0.55)
+texture = ExtResource("1_0vuhr")
+script = ExtResource("2_7a8by")
+ground_lanes = [NodePath(""), NodePath(""), NodePath("")]
+canvas_layer = NodePath("")
+infantry_marker = NodePath("")
+tank_marker = NodePath("TankMarker")
+plane_marker = NodePath("PlaneMarker")
+enemy_marker = NodePath("")
+
+[node name="PlaneMarker" type="Marker2D" parent="." unique_id=2012376125]
+position = Vector2(738.18176, -49.090923)
+
+[node name="TankMarker" type="Marker2D" parent="." unique_id=723914088]
+position = Vector2(185.71426, 637.7777)
+
+[node name="Behind" type="Sprite2D" parent="." unique_id=1184879691]
+visible = false
+texture = ExtResource("3_kswup")

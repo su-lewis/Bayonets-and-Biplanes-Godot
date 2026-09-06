@@ -8,64 +8,37 @@ extends Camera2D
 @export_category("Zooming")
 @export var zoom_normal: float = 1.0       
 @export var zoom_out_max: float = 0.4      
-@export var zoom_in_max: float = 1.5       
-@export var zoom_step: float = 0.1         
+@export var world_bottom_edge: float = 1080.0 # The absolute lowest Y-coordinate of your mud/trench
+@export var ui_panel_height: float = 200.0    # Set this to the exact pixel height of your UI
 
 var current_velocity: float = 0.0
-var is_dragging: bool = false
+var is_zoomed_out: bool = false
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+	_align_camera_y(zoom_normal)
 
-func _unhandled_input(event: InputEvent) -> void:
-	# 1. Spacebar Toggle 
+func _input(event: InputEvent) -> void:
+	# Spacebar Toggle 
 	if event is InputEventKey and event.keycode == KEY_SPACE and event.pressed and not event.echo:
-		if abs(zoom.x - zoom_out_max) < 0.01:
-			zoom = Vector2(zoom_normal, zoom_normal)
-		else:
-			zoom = Vector2(zoom_out_max, zoom_out_max)
-
-	# 2. Left Click Drag Toggle
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		is_dragging = event.pressed
-
-	# 3. Drag Panning (1:1 Instant Snap)
-	if event is InputEventMouseMotion and is_dragging:
-		global_position -= event.relative / zoom.x
-
-	# 4. Mouse Wheel Scroll (Flawless Pointer Zoom Math)
-	if event is InputEventMouseButton and event.pressed:
-		var new_zoom = zoom.x
-		var zoom_changed = false
+		is_zoomed_out = !is_zoomed_out
 		
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			new_zoom = clamp(zoom.x + zoom_step, zoom_out_max, zoom_in_max)
-			zoom_changed = true
-		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			new_zoom = clamp(zoom.x - zoom_step, zoom_out_max, zoom_in_max)
-			zoom_changed = true
+		var target_zoom = zoom_out_max if is_zoomed_out else zoom_normal
+		zoom = Vector2(target_zoom, target_zoom)
+		_align_camera_y(target_zoom)
 
-		if zoom_changed and new_zoom != zoom.x:
-			# Capturing the world coordinates before the engine updates
-			var mouse_world = get_global_mouse_position()
-			var cam_center = get_screen_center_position()
-			
-			# The distance from the center of the screen to the mouse
-			var offset = mouse_world - cam_center
-			var zoom_ratio = zoom.x / new_zoom
-			
-			# Apply zoom instantly
-			zoom = Vector2(new_zoom, new_zoom) 
-			
-			# Manually shift the camera by the exact pixel difference
-			global_position += offset * (1.0 - zoom_ratio) 
+# --- THE PERFECTED MATH ---
+func _align_camera_y(current_zoom: float) -> void:
+	var viewport_height = get_viewport_rect().size.y
+	
+	# Calculate the distance from the center of the monitor down to the top of your UI
+	var screen_center_to_ui_top = (viewport_height / 2.0) - ui_panel_height
+	
+	# Lock the camera so your world's bottom edge never dips below the UI line
+	global_position.y = world_bottom_edge - (screen_center_to_ui_top / current_zoom)
 
 func _process(delta: float) -> void:
 	# --- EDGE PANNING ---
-	if is_dragging:
-		current_velocity = 0.0
-		return
-		
 	var target_direction = 0.0
 	var mouse_pos = get_viewport().get_mouse_position()
 	var screen_size = get_viewport_rect().size
