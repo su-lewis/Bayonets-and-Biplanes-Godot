@@ -35,6 +35,9 @@ script = ExtResource("13_ssrdg")
 
 [node name="sky_day" parent="." unique_id=712210724 instance=ExtResource("1_k53ln")]
 
+[node name="SkyDay" parent="sky_day/ParallaxLayer" parent_id_path=PackedInt32Array(712210724, 2055026763) index="0" unique_id=956951949]
+position = Vector2(0, -743)
+
 [node name="town_backdrop" parent="." unique_id=13792386 instance=ExtResource("2_fc4l0")]
 
 [node name="Lanes" type="Node2D" parent="." unique_id=1440200053]
@@ -91,6 +94,7 @@ z_index = 1
 position = Vector2(12389, 792)
 flip_h = true
 
+[editable path="sky_day"]
 [editable path="british_factory"]
 [editable path="british_barracks"]
 [editable path="german_factory"]

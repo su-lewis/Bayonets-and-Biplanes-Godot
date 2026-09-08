@@ -7,7 +7,7 @@
 size = Vector2(744, 176)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_oamna"]
-size = Vector2(730.5, 130)
+size = Vector2(730.5, 189)
 
 [node name="Tank" type="CharacterBody2D" unique_id=112666923]
 collision_layer = 2
@@ -28,5 +28,5 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=1393200195]
-position = Vector2(859, -126)
+position = Vector2(859, -96.5)
 shape = SubResource("RectangleShape2D_oamna")

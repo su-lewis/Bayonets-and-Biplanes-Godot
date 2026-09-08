@@ -28,7 +28,7 @@ radius = 18.0
 height = 124.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uaeut"]
-size = Vector2(600, 109)
+size = Vector2(600, 127)
 
 [node name="Soldier" type="CharacterBody2D" unique_id=1497413185]
 collision_layer = 2
@@ -49,5 +49,5 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=707235094]
-position = Vector2(300, -54.5)
+position = Vector2(300, -63.5)
 shape = SubResource("RectangleShape2D_uaeut")
