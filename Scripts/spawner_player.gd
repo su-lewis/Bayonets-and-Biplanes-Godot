@@ -1,11 +1,12 @@
 extends Node2D
 
-var soldier_scene: PackedScene = preload("res://Units/unit_rifleman.tscn")
-var biplane_scene: PackedScene = preload("res://Units/unit_biplane.tscn")
-var tank_scene: PackedScene = preload("res://Units/unit_mark1_tank.tscn")
+@export_category("Unit Scenes")
+@export var soldier_scene: PackedScene
+@export var tank_scene: PackedScene
+@export var biplane_scene: PackedScene
 
+@export_category("Spawners and Lanes")
 @export var ground_lanes: Array[Node2D] = []
-@export var canvas_layer: CanvasLayer # This is your SpawnUI node
 @export var infantry_marker: Marker2D
 @export var tank_marker: Marker2D
 @export var plane_marker: Marker2D
@@ -15,10 +16,6 @@ var ordered_lanes: Array[Node2D] = []
 var current_lane_index: int = 0
 
 func _ready() -> void:
-	if not canvas_layer:
-		push_error("Canvas Layer not assigned in inspector!")
-		return
-
 	# Ensure correct 2.5D visual rendering (Y-Sorting)
 	y_sort_enabled = true 
 	for lane in ground_lanes:
@@ -28,10 +25,10 @@ func _ready() -> void:
 	ordered_lanes = ground_lanes.duplicate()
 	ordered_lanes.sort_custom(func(a, b): return a.global_position.y > b.global_position.y)
 
-	# --- NEW: Connect to the Custom Signals emitted by the UI ---
-	canvas_layer.spawn_rifleman_requested.connect(_on_ui_spawn_rifleman)
-	canvas_layer.spawn_tank_requested.connect(_on_ui_spawn_tank)
-	canvas_layer.spawn_biplane_requested.connect(spawn_biplane)
+	# Connect to the global event bus
+	SignalBus.spawn_rifleman_requested.connect(_on_ui_spawn_rifleman)
+	SignalBus.spawn_tank_requested.connect(_on_ui_spawn_tank)
+	SignalBus.spawn_biplane_requested.connect(spawn_biplane)
 
 	# Test Enemy Spawner
 	var enemy_timer = Timer.new()
@@ -47,16 +44,18 @@ func _on_ui_spawn_rifleman() -> void:
 func _on_ui_spawn_tank() -> void:
 	spawn_unit(tank_scene, tank_marker, false)
 
-# --- Physical Spawning Logic (Unchanged) ---
+# --- Physical Spawning Logic ---
 func spawn_infantry_squad(spawn_point: Node2D, is_enemy_team: bool = false) -> void:
+	if not soldier_scene: return
+	
 	var chosen_lane = ordered_lanes.pick_random()
 	var squad_y_offset = randf_range(10.0, 35.0)
 	var final_target_y = chosen_lane.global_position.y + squad_y_offset
 	
 	var min_scale: float = 0.70
 	var max_scale: float = 1.00
-	var min_y: float = 440.0
-	var max_y: float = 870.0
+	var min_y: float = 400.0
+	var max_y: float = 990.0 
 	var weight: float = clamp((final_target_y - min_y) / (max_y - min_y), 0.0, 1.0)
 	var perspective_scale: float = lerp(min_scale, max_scale, weight)
 	
@@ -74,6 +73,8 @@ func spawn_infantry_squad(spawn_point: Node2D, is_enemy_team: bool = false) -> v
 		new_unit.target_scale = new_unit.base_scale * perspective_scale
 
 func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team: bool = false) -> void:
+	if not scene_to_spawn: return
+	
 	var new_unit = scene_to_spawn.instantiate()
 	new_unit.is_enemy = is_enemy_team 
 	
@@ -87,13 +88,15 @@ func spawn_unit(scene_to_spawn: PackedScene, spawn_point: Node2D, is_enemy_team:
 	
 	var min_scale: float = 0.70  
 	var max_scale: float = 1.00  
-	var min_y: float = 440.0     
-	var max_y: float = 870.0     
+	var min_y: float = 400.0     
+	var max_y: float = 990.0     
 	var weight: float = clamp((chosen_lane.global_position.y - min_y) / (max_y - min_y), 0.0, 1.0)
 	var perspective_scale: float = lerp(min_scale, max_scale, weight)
 	new_unit.target_scale = new_unit.base_scale * perspective_scale
 
 func spawn_biplane() -> void:
+	if not biplane_scene: return
+	
 	var new_plane = biplane_scene.instantiate()
 	var sky_tier: int = randi() % 2
 	var base_sky_y: float = plane_marker.global_position.y

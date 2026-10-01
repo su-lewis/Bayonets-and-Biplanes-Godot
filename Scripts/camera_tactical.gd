@@ -6,24 +6,26 @@ extends Camera2D
 @export var edge_pan_acceleration: float = 15.0
 
 @export_category("Zooming")
-@export var zoom_normal: float = 1.0       
-@export var zoom_out_max: float = 0.4      
+@export var zoom_default: float = 0.6         # Your main, zoomed-out view
+@export var zoom_in_level: float = 1.0        # Your zoomed-in toggle view
 @export var world_bottom_edge: float = 1080.0 # The absolute lowest Y-coordinate of your mud/trench
-@export var ui_panel_height: float = 200.0    # Set this to the exact pixel height of your UI
+@export var ui_panel_height: float = 90.0    # Set this to the exact pixel height of your UI
 
 var current_velocity: float = 0.0
-var is_zoomed_out: bool = false
+var is_zoomed_in: bool = false                # Flipped the logic: we now track if we are zoomed IN
 
 func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
-	_align_camera_y(zoom_normal)
+	# Start the game in the zoomed-out view
+	zoom = Vector2(zoom_default, zoom_default)
+	_align_camera_y(zoom_default)
 
 func _input(event: InputEvent) -> void:
 	# Spacebar Toggle 
 	if event is InputEventKey and event.keycode == KEY_SPACE and event.pressed and not event.echo:
-		is_zoomed_out = !is_zoomed_out
+		is_zoomed_in = !is_zoomed_in
 		
-		var target_zoom = zoom_out_max if is_zoomed_out else zoom_normal
+		var target_zoom = zoom_in_level if is_zoomed_in else zoom_default
 		zoom = Vector2(target_zoom, target_zoom)
 		_align_camera_y(target_zoom)
 

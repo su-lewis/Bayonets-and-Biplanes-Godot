@@ -2,19 +2,23 @@
 
 [ext_resource type="PackedScene" uid="uid://co5om32rq3ld2" path="res://Scenes/sky_day.tscn" id="1_k53ln"]
 [ext_resource type="PackedScene" uid="uid://dwukwcjpnfk52" path="res://Scenes/town_backdrop.tscn" id="2_fc4l0"]
-[ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_controller.gd" id="3_tkjg1"]
-[ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/barracks_spawner.gd" id="3_vsh2u"]
+[ext_resource type="PackedScene" uid="uid://qw5uyunj3o2f" path="res://Units/unit_rifleman.tscn" id="2_k53ln"]
+[ext_resource type="PackedScene" uid="uid://bfx6456gepaec" path="res://Units/unit_mark1_tank.tscn" id="3_qbwnf"]
+[ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_tactical.gd" id="3_tkjg1"]
+[ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/spawner_player.gd" id="3_vsh2u"]
+[ext_resource type="PackedScene" uid="uid://btyrqyd1nqxh4" path="res://Units/unit_biplane.tscn" id="4_ssrdg"]
 [ext_resource type="PackedScene" uid="uid://wv5sw6af01mr" path="res://Scenes/british_factory.tscn" id="6_k53ln"]
 [ext_resource type="PackedScene" uid="uid://bucr1vu21msgf" path="res://Scenes/british_barracks.tscn" id="7_uwhxi"]
 [ext_resource type="PackedScene" uid="uid://byjlil1ks0v0v" path="res://Scenes/HUD.tscn" id="7_xr3kp"]
 [ext_resource type="PackedScene" uid="uid://dwrbl01kov4vl" path="res://Scenes/german_factory.tscn" id="8_xr3kp"]
 [ext_resource type="PackedScene" uid="uid://l8ww7t5oq1s5" path="res://Scenes/german_barracks.tscn" id="9_y3su5"]
-[ext_resource type="Script" uid="uid://cxyasqnbcrc40" path="res://Scripts/spawn_ui.gd" id="13_ssrdg"]
 
-[node name="Battlefield" type="Node2D" unique_id=1725853040 node_paths=PackedStringArray("ground_lanes", "canvas_layer", "infantry_marker", "tank_marker", "plane_marker", "enemy_marker")]
+[node name="Battlefield" type="Node2D" unique_id=1725853040 node_paths=PackedStringArray("ground_lanes", "infantry_marker", "tank_marker", "plane_marker", "enemy_marker")]
 script = ExtResource("3_vsh2u")
+soldier_scene = ExtResource("2_k53ln")
+tank_scene = ExtResource("3_qbwnf")
+biplane_scene = ExtResource("4_ssrdg")
 ground_lanes = [NodePath("Lanes/TopLane"), NodePath("Lanes/MiddleLane"), NodePath("Lanes/BottomLane")]
-canvas_layer = NodePath("HUD")
 infantry_marker = NodePath("british_barracks/InfantryMarker")
 tank_marker = NodePath("british_factory/TankMarker")
 plane_marker = NodePath("british_factory/PlaneMarker")
@@ -23,20 +27,22 @@ enemy_marker = NodePath("german_barracks/InfantryMarker")
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1640978505]
 position = Vector2(960, 540)
 limit_left = 0
+limit_right = 20000
 limit_smoothed = true
 editor_draw_limits = true
 script = ExtResource("3_tkjg1")
-zoom_out_max = 0.6
 world_bottom_edge = 990.0
-ui_panel_height = 90.0
 
 [node name="HUD" parent="." unique_id=1251239764 instance=ExtResource("7_xr3kp")]
-script = ExtResource("13_ssrdg")
 
 [node name="sky_day" parent="." unique_id=712210724 instance=ExtResource("1_k53ln")]
+scroll_ignore_camera_zoom = false
 
-[node name="SkyDay" parent="sky_day/ParallaxLayer" parent_id_path=PackedInt32Array(712210724, 2055026763) index="0" unique_id=956951949]
-position = Vector2(0, -743)
+[node name="ParallaxLayer" parent="sky_day" index="0" unique_id=2055026763]
+motion_scale = Vector2(0.1, 1)
+
+[node name="SkyDay" parent="sky_day/ParallaxLayer" index="0" unique_id=956951949]
+position = Vector2(0, -1080)
 
 [node name="town_backdrop" parent="." unique_id=13792386 instance=ExtResource("2_fc4l0")]
 
@@ -44,7 +50,7 @@ position = Vector2(0, -743)
 y_sort_enabled = true
 
 [node name="TopLane" type="Node2D" parent="Lanes" unique_id=1140387156]
-position = Vector2(0, 440)
+position = Vector2(0, 400)
 
 [node name="ColorRect" type="ColorRect" parent="Lanes/TopLane" unique_id=757284429]
 offset_right = 12844.0
@@ -52,26 +58,25 @@ offset_bottom = 200.0
 color = Color(0.1764706, 0.7764706, 0.84313726, 1)
 
 [node name="MiddleLane" type="Node2D" parent="Lanes" unique_id=47691978]
-position = Vector2(0, 640)
+position = Vector2(0, 600)
 
 [node name="ColorRect" type="ColorRect" parent="Lanes/MiddleLane" unique_id=1607456962]
-offset_top = -0.22497559
 offset_right = 12844.0
 offset_bottom = 230.0
 color = Color(0.06348172, 0.6545185, 0.6638767, 1)
 
 [node name="BottomLane" type="Node2D" parent="Lanes" unique_id=639358213]
-position = Vector2(0, 870)
+position = Vector2(0, 830)
 
 [node name="ColorRect" type="ColorRect" parent="Lanes/BottomLane" unique_id=1106516958]
 offset_right = 12844.0
-offset_bottom = 120.0
+offset_bottom = 160.0
 color = Color(0.22745098, 0.3137255, 0.94509804, 1)
 
-[node name="LowSky" type="Node2D" parent="Lanes" unique_id=418360194]
-position = Vector2(354, 337)
+[node name="HighSky" type="Node2D" parent="Lanes" unique_id=209862521]
+position = Vector2(354, -481)
 
-[node name="HighSky" type="Node2D" parent="Lanes" unique_id=567414128]
+[node name="LowSky" type="Node2D" parent="Lanes" unique_id=567414128]
 position = Vector2(354, 119)
 
 [node name="british_factory" parent="." unique_id=462115179 instance=ExtResource("6_k53ln")]

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://bfx6456gepaec"]
 
-[ext_resource type="Script" uid="uid://ds4up1g0yvdwa" path="res://Units/unit_mark1_tank.gd" id="1_hbelr"]
+[ext_resource type="Script" uid="uid://ds4up1g0yvdwa" path="res://Units/unit_vehicle_mark1_tank.gd" id="1_hbelr"]
 [ext_resource type="Texture2D" uid="uid://bol5ga44uplqf" path="res://Units/unit_british_tank.png" id="2_c6epr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_uaeut"]

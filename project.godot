@@ -13,17 +13,22 @@ config_version=5
 config/name="Bayonets & Biplanes"
 run/main_scene="uid://buiaupgdov2rt"
 config/features=PackedStringArray("4.7", "Mobile")
-config/icon="res://icon.svg"
 
 [autoload]
 
 GameManager="*uid://bhi7u66svq500"
+SignalBus="*uid://qs6pag4btmyw"
 
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[editor]
+
+version_control/autoload_on_startup=true
 
 [importer_defaults]
 

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://qw5uyunj3o2f"]
 
-[ext_resource type="Script" uid="uid://dgh4mt4ssaxv" path="res://Units/unit_rifleman.gd" id="1_dblnu"]
+[ext_resource type="Script" uid="uid://dgh4mt4ssaxv" path="res://Units/unit_infantry_rifleman.gd" id="1_dblnu"]
 [ext_resource type="Texture2D" uid="uid://cloxc486eli66" path="res://Units/unit_british_rifleman_aim.png" id="2_a1yoe"]
 [ext_resource type="Texture2D" uid="uid://bnwpvswu4xwnw" path="res://Units/unit_british_rifleman_walk.png" id="3_k0k2g"]
 

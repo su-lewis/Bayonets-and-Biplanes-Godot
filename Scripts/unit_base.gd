@@ -44,7 +44,6 @@ func _ready() -> void:
 	
 	if is_enemy:
 		move_dir = -1.0
-		# THE FIX: Removed `if sprite: sprite.flip_h = true` to fix moonwalking bug
 		
 		if attack_range:
 			for child in attack_range.get_children():
@@ -53,7 +52,6 @@ func _ready() -> void:
 	else:
 		move_dir = 1.0
 
-# THE FIX: Safe scale logic that flips direction cleanly
 func _set_sprite_scale(s: float) -> void:
 	if not sprite: return
 	var sign_x = -1.0 if is_enemy else 1.0
@@ -114,7 +112,6 @@ func _physics_process(delta: float) -> void:
 		State.ROLLOUT:
 			velocity = Vector2(move_speed * move_dir, 0)
 			
-			# Walk out of building first before turning toward lane
 			if (not is_enemy and global_position.x >= start_x + walk_out_distance) or \
 			   (is_enemy and global_position.x <= start_x - walk_out_distance):
 				start_y_for_scale = global_position.y 
@@ -124,17 +121,14 @@ func _physics_process(delta: float) -> void:
 			var y_diff = target_lane_y - global_position.y
 			var vertical_speed = max(move_speed * 2.0, 200.0)
 			
-			# THE FIX: Clean lane snapping prevents tank oscillation/bouncing
 			if abs(y_diff) <= vertical_speed * delta:
 				global_position.y = target_lane_y
 				_set_sprite_scale(target_scale)
 				current_state = State.LANE_PUSH
 			else:
-				# Otherwise, move smoothly without the delta division jitter
 				var y_vel = sign(y_diff) * vertical_speed
 				velocity = Vector2(move_speed * move_dir, y_vel)
 				
-				# Smooth perspective scaling
 				var total_y_dist = abs(target_lane_y - start_y_for_scale)
 				if total_y_dist > 0.1:
 					var current_y_dist = abs(global_position.y - start_y_for_scale)
@@ -143,8 +137,6 @@ func _physics_process(delta: float) -> void:
 				
 		State.LANE_PUSH:
 			velocity = Vector2(move_speed * move_dir, 0)
-			
-			# THE FIX: No forced manual Y-position overriding here!
 			_set_sprite_scale(target_scale)
 			
 			if sprite is AnimatedSprite2D and sprite.animation != "walk":
