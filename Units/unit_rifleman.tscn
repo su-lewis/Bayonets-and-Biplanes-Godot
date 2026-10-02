@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://qw5uyunj3o2f"]
 
-[ext_resource type="Script" uid="uid://dgh4mt4ssaxv" path="res://Units/unit_infantry_rifleman.gd" id="1_dblnu"]
+[ext_resource type="Script" uid="uid://nay6m4usp7i3" path="res://Scripts/unit_base.gd" id="1_k0k2g"]
 [ext_resource type="Texture2D" uid="uid://cloxc486eli66" path="res://Units/unit_british_rifleman_aim.png" id="2_a1yoe"]
 [ext_resource type="Texture2D" uid="uid://bnwpvswu4xwnw" path="res://Units/unit_british_rifleman_walk.png" id="3_k0k2g"]
 
@@ -27,12 +27,9 @@ animations = [{
 radius = 18.0
 height = 124.0
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_uaeut"]
-size = Vector2(600, 127)
-
 [node name="Soldier" type="CharacterBody2D" unique_id=1497413185]
 collision_layer = 2
-script = ExtResource("1_dblnu")
+script = ExtResource("1_k0k2g")
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=786232574]
 scale = Vector2(0.25, 0.25)
@@ -43,11 +40,3 @@ offset = Vector2(0, -256)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=243647102]
 position = Vector2(-23, -62)
 shape = SubResource("CapsuleShape2D_8swxs")
-
-[node name="AttackRange" type="Area2D" parent="." unique_id=2078786572]
-collision_layer = 0
-collision_mask = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRange" unique_id=707235094]
-position = Vector2(300, -63.5)
-shape = SubResource("RectangleShape2D_uaeut")

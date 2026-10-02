@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://ckpp40ft2g4n4"]
+
+[ext_resource type="Script" uid="uid://bdu86v8s5pi4l" path="res://Scripts/weapon_data.gd" id="1_42rvi"]
+
+[resource]
+script = ExtResource("1_42rvi")
+weapon_name = "SMLE Mk III"
+attack_range = 160.0
+fire_rate = 1.2
+vital_hit_chance = 0.15
+metadata/_custom_type_script = "uid://bdu86v8s5pi4l"

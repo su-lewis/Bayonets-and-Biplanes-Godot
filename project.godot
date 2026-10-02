@@ -17,7 +17,8 @@ config/features=PackedStringArray("4.7", "Mobile")
 [autoload]
 
 GameManager="*uid://bhi7u66svq500"
-SignalBus="*uid://qs6pag4btmyw"
+SignalBus="*uid://c1k5rbpxf1kua"
+CombatResolver="*uid://ckyhagkrij0ml"
 
 [display]
 

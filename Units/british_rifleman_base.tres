@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://drglq2fftdts2"]
+
+[ext_resource type="PackedScene" uid="uid://qw5uyunj3o2f" path="res://Units/unit_rifleman.tscn" id="1_0thwx"]
+[ext_resource type="Script" uid="uid://b87yc5bakb8f2" path="res://Scripts/unit_data.gd" id="2_ul73o"]
+[ext_resource type="Script" uid="uid://bdu86v8s5pi4l" path="res://Scripts/weapon_data.gd" id="3_k2x40"]
+[ext_resource type="Resource" uid="uid://ckpp40ft2g4n4" path="res://Units/british_rifleman_base_gun.tres" id="4_7cwkl"]
+
+[resource]
+script = ExtResource("2_ul73o")
+scene = ExtResource("1_0thwx")
+cost = 75
+squad_size = 5
+max_hp = 80.0
+weapons = Array[ExtResource("3_k2x40")]([ExtResource("4_7cwkl")])
+metadata/_custom_type_script = "uid://b87yc5bakb8f2"

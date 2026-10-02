@@ -1,34 +1,28 @@
 extends Node
 
-signal pigeon_changed(new_count: int)
+signal war_bonds_changed(new_count: int)
 
-var pigeons: int = 0:
+var war_bonds: int = 0:
 	set(value):
-		pigeons = maxi(0, value) 
-		pigeon_changed.emit(pigeons)
+		war_bonds = maxi(0, value) 
+		war_bonds_changed.emit(war_bonds)
 
 func _ready() -> void:
-	var pigeon_timer = Timer.new()
-	pigeon_timer.wait_time = 1.0
-	pigeon_timer.timeout.connect(_on_pigeon_timer_timeout)
-	
-	add_child(pigeon_timer)
-	pigeon_timer.start() 
+	var bond_timer = Timer.new()
+	bond_timer.wait_time = 1.0
+	bond_timer.timeout.connect(func(): add_war_bonds(1))
+	add_child(bond_timer)
+	bond_timer.start() 
 
-	add_pigeons.call_deferred(8000)
+	add_war_bonds.call_deferred(8000)
 
-func _on_pigeon_timer_timeout() -> void:
-	add_pigeons(1)
-
-func add_pigeons(amount: int) -> void:
+func add_war_bonds(amount: int) -> void:
 	if amount <= 0: return 
-	pigeons += amount
+	war_bonds += amount
 
-func spend_pigeons(amount: int) -> bool:
+func spend_war_bonds(amount: int) -> bool:
 	if amount <= 0: return false
-	if pigeons >= amount:
-		pigeons -= amount
+	if war_bonds >= amount:
+		war_bonds -= amount
 		return true
-		
-	print("Not enough pigeons!")
 	return false

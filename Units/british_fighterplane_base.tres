@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://wxrai30fo7wb"]
+
+[ext_resource type="PackedScene" uid="uid://btyrqyd1nqxh4" path="res://Units/unit_biplane.tscn" id="1_5mdia"]
+[ext_resource type="Script" uid="uid://b87yc5bakb8f2" path="res://Scripts/unit_data.gd" id="2_v0uhp"]
+
+[resource]
+script = ExtResource("2_v0uhp")
+unit_name = null
+scene = ExtResource("1_5mdia")
+cost = 120
+spawn_facility = 2
+max_hp = null
+damage = null
+attack_cooldown = null
+attack_range = null
+move_speed = 200.0
+walk_out_distance = 0.0
+is_flying = true
+metadata/_custom_type_script = "uid://b87yc5bakb8f2"

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UnitData" format=3 uid="uid://dodwi82mr4twc"]
+
+[ext_resource type="Script" uid="uid://b87yc5bakb8f2" path="res://Scripts/unit_data.gd" id="1_f5rnm"]
+[ext_resource type="PackedScene" uid="uid://bfx6456gepaec" path="res://Units/unit_mark1_tank.tscn" id="1_lra46"]
+[ext_resource type="Script" uid="uid://bdu86v8s5pi4l" path="res://Scripts/weapon_data.gd" id="3_dwhrw"]
+
+[resource]
+script = ExtResource("1_f5rnm")
+scene = ExtResource("1_lra46")
+cost = 250
+spawn_facility = 1
+max_hp = 400.0
+walk_out_distance = 150.0
+is_vehicle = true
+metadata/_custom_type_script = "uid://b87yc5bakb8f2"

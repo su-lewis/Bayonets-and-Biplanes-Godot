@@ -2,21 +2,18 @@ extends CharacterBody2D
 class_name BaseUnit
 
 enum State { ROLLOUT, DIAGONAL_PUSH, LANE_PUSH, ATTACK }
-enum DamageType { BULLET, EXPLOSIVE, MELEE, FIRE }
-enum ArmorType { UNARMORED, LIGHT, HEAVY, BUILDING }
 
-@export var max_hp: float = 100.0
-@export var damage: float = 20.0
-@export var attack_cooldown: float = 1.0 
-@export var move_speed: float = 50.0
-@export var walk_out_distance: float = 120.0
+@export var data: UnitData 
 
-@export var armor_type: ArmorType = ArmorType.LIGHT
-@export var damage_type: DamageType = DamageType.BULLET
-
-var current_hp: float = 100.0
+var current_hp: float
 var is_enemy: bool = false
 var move_dir: float = 1.0 
+var lane_id: int = 0
+var current_state: State = State.ROLLOUT 
+
+# Weapon Tracking
+var weapon_cooldowns: Dictionary = {}
+var current_target: BaseUnit = null
 
 var target_lane_y: float = 0.0 
 var target_scale: float = 1.0 
@@ -24,134 +21,178 @@ var base_scale: float = 1.0
 var start_x: float = 0.0
 var start_y_for_scale: float = 0.0 
 
-var current_state: State = State.ROLLOUT 
-var attack_timer: float = 0.0
-var current_target: Node2D = null
-
 @onready var sprite = $Sprite2D
-@onready var attack_range: Area2D = $AttackRange 
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	current_hp = max_hp
-	
-	# Lock initial spawn position for rollout calculations
+	current_hp = data.max_hp
 	start_x = global_position.x
 	start_y_for_scale = global_position.y
+	if sprite: base_scale = abs(sprite.scale.x)
+	move_dir = -1.0 if is_enemy else 1.0
+	add_to_group("enemy_units" if is_enemy else "player_units")
 	
-	if sprite:
-		base_scale = abs(sprite.scale.x)
-	
-	if is_enemy:
-		move_dir = -1.0
-		
-		if attack_range:
-			for child in attack_range.get_children():
-				if child is CollisionShape2D:
-					child.position.x *= -1 
-	else:
-		move_dir = 1.0
+	# Initialize all weapon cooldowns to 0
+	for weapon in data.weapons:
+		weapon_cooldowns[weapon] = 0.0
 
 func _set_sprite_scale(s: float) -> void:
 	if not sprite: return
-	var sign_x = -1.0 if is_enemy else 1.0
-	sprite.scale = Vector2(s * sign_x, s)
+	sprite.scale = Vector2(s * (-1.0 if is_enemy else 1.0), s)
+
+func take_damage(amount: float, pen_mm: float, is_vital: bool) -> void:
+	var actual_damage = CombatResolver.calculate_damage(amount, pen_mm, data.armor_thickness_mm, is_vital)
+	
+	if actual_damage > 0:
+		current_hp -= actual_damage
+		if sprite:
+			sprite.modulate = Color.RED
+			get_tree().create_timer(0.1).timeout.connect(func(): if is_instance_valid(sprite): sprite.modulate = Color.WHITE)
+			
+	if current_hp <= 0:
+		queue_free()
 
 func _find_target() -> void:
-	if not attack_range: return
+	var enemy_group = "player_units" if is_enemy else "enemy_units"
+	var closest_enemy: BaseUnit = null
 	
-	for body in attack_range.get_overlapping_bodies():
-		if body is BaseUnit and body != self and is_instance_valid(body) and not body.is_queued_for_deletion():
-			var is_same_lane = abs(body.target_lane_y - self.target_lane_y) < 20.0
-			var is_in_front = sign(body.global_position.x - self.global_position.x) == sign(move_dir)
-			
-			if body.is_enemy != self.is_enemy and is_same_lane and is_in_front:
-				current_target = body
-				return
-
-func take_damage(amount: float, incoming_type: DamageType) -> void:
-	var multiplier = _calculate_multiplier(incoming_type, armor_type)
-	var final_damage = amount * multiplier
-	current_hp -= final_damage
-	
-	if sprite:
-		sprite.modulate = Color.RED
-		var timer = get_tree().create_timer(0.1)
-		timer.timeout.connect(func(): if is_instance_valid(sprite): sprite.modulate = Color.WHITE)
+	# Find max range among all equipped weapons
+	var max_range: float = 0.0
+	for w in data.weapons:
+		if w.attack_range > max_range: max_range = w.attack_range
 		
-	if current_hp <= 0:
-		queue_free() 
+	var closest_dist: float = max_range
+	
+	for enemy in get_tree().get_nodes_in_group(enemy_group):
+		if not is_instance_valid(enemy) or enemy.is_queued_for_deletion(): continue
+		if enemy.data.is_flying != self.data.is_flying: continue 
+		if not data.is_flying and enemy.lane_id != self.lane_id: continue 
+			
+		var dist_in_front = (enemy.global_position.x - global_position.x) * move_dir
+		if dist_in_front > 0.0 and dist_in_front <= closest_dist:
+			closest_dist = dist_in_front
+			closest_enemy = enemy
+			
+	current_target = closest_enemy
 
-func _calculate_multiplier(dmg: DamageType, armor: ArmorType) -> float:
-	match dmg:
-		DamageType.BULLET:
-			match armor:
-				ArmorType.LIGHT: return 1.0
-				ArmorType.HEAVY: return 0.15
-		DamageType.EXPLOSIVE:
-			match armor:
-				ArmorType.LIGHT: return 2.0
-				ArmorType.HEAVY: return 1.0
-	return 1.0
+func _fire_weapons() -> void:
+	if not is_instance_valid(current_target): return
+	var dist = abs(current_target.global_position.x - global_position.x)
+	var is_moving = (current_state != State.ATTACK)
+	
+	for weapon in data.weapons:
+		if weapon_cooldowns[weapon] <= 0.0 and dist <= weapon.attack_range:
+			weapon_cooldowns[weapon] = weapon.fire_rate
+			
+			# Accuracy Math
+			var hit_chance = weapon.base_accuracy
+			if is_moving: hit_chance -= weapon.moving_accuracy_penalty
+			
+			var dice_roll = randf()
+			var is_hit = dice_roll <= hit_chance
+			var is_vital = dice_roll <= weapon.vital_hit_chance
+			
+			_spawn_tracer(current_target, is_hit)
+			
+			if is_hit:
+				current_target.take_damage(weapon.damage, weapon.penetration_mm, is_vital)
+
+func _spawn_tracer(target: BaseUnit, is_hit: bool) -> void:
+	var tracer = Line2D.new()
+	tracer.width = 1.0
+	tracer.default_color = Color(1.0, 0.9, 0.5, 0.8) # Faint yellow flash
+	
+	# Start at the gun barrel (approximate center of sprite)
+	var start_pos = global_position + Vector2(10 * move_dir, -10)
+	var end_pos = target.global_position + Vector2(0, -10)
+	
+	# If missed, visibly deflect the bullet into the dirt or over their head
+	if not is_hit:
+		var miss_y = randf_range(-40.0, 40.0) 
+		var miss_x = randf_range(20.0, 50.0) * move_dir
+		end_pos += Vector2(miss_x, miss_y)
+		
+	tracer.add_point(start_pos)
+	tracer.add_point(end_pos)
+	get_tree().current_scene.add_child(tracer)
+	
+	# Instantly fade the tracer out in 0.1 seconds to fake high velocity
+	var tween = create_tween()
+	tween.tween_property(tracer, "modulate:a", 0.0, 0.1)
+	tween.tween_callback(tracer.queue_free)
 
 func _physics_process(delta: float) -> void:
-	# Clean up dead target references
+	# Tick down all weapon cooldowns
+	for weapon in weapon_cooldowns.keys():
+		if weapon_cooldowns[weapon] > 0.0:
+			weapon_cooldowns[weapon] -= delta
+
+	# (Keep your existing airplane, target-finding, and movement state machine code here EXACTLY as it was)
+	
+	if data.is_flying:
+		global_position.x += (data.move_speed * move_dir) * delta
+		return 
+
 	if is_instance_valid(current_target) and current_target.is_queued_for_deletion():
 		current_target = null
 
 	if current_state == State.LANE_PUSH:
 		if not is_instance_valid(current_target):
-			_find_target() 
+			_find_target()
 		else:
 			current_state = State.ATTACK 
 
-	if current_state == State.ATTACK and not is_instance_valid(current_target):
-		current_state = State.LANE_PUSH
+	if current_state == State.ATTACK:
+		if not is_instance_valid(current_target):
+			current_state = State.LANE_PUSH
+		else:
+			var dist = (current_target.global_position.x - global_position.x) * move_dir
+			# Check if target is out of the LONGEST weapon range
+			var max_range: float = 0.0
+			for w in data.weapons:
+				if w.attack_range > max_range: max_range = w.attack_range
+			
+			if dist < 0.0 or dist > max_range:
+				current_target = null
+				current_state = State.LANE_PUSH
+			else:
+				_fire_weapons() # FIRE ALL READY WEAPONS
 
 	match current_state:
 		State.ROLLOUT:
-			velocity = Vector2(move_speed * move_dir, 0)
-			
-			if (not is_enemy and global_position.x >= start_x + walk_out_distance) or \
-			   (is_enemy and global_position.x <= start_x - walk_out_distance):
+			velocity = Vector2(data.move_speed * move_dir, 0)
+			if (not is_enemy and global_position.x >= start_x + data.walk_out_distance) or \
+			   (is_enemy and global_position.x <= start_x - data.walk_out_distance):
 				start_y_for_scale = global_position.y 
 				current_state = State.DIAGONAL_PUSH
 				
 		State.DIAGONAL_PUSH:
 			var y_diff = target_lane_y - global_position.y
-			var vertical_speed = max(move_speed * 2.0, 200.0)
+			var vertical_speed = max(data.move_speed * 2.0, 200.0)
 			
 			if abs(y_diff) <= vertical_speed * delta:
 				global_position.y = target_lane_y
 				_set_sprite_scale(target_scale)
 				current_state = State.LANE_PUSH
 			else:
-				var y_vel = sign(y_diff) * vertical_speed
-				velocity = Vector2(move_speed * move_dir, y_vel)
-				
+				velocity = Vector2(data.move_speed * move_dir, sign(y_diff) * vertical_speed)
 				var total_y_dist = abs(target_lane_y - start_y_for_scale)
 				if total_y_dist > 0.1:
-					var current_y_dist = abs(global_position.y - start_y_for_scale)
-					var progress = clamp(current_y_dist / total_y_dist, 0.0, 1.0)
+					var progress = clamp(abs(global_position.y - start_y_for_scale) / total_y_dist, 0.0, 1.0)
 					_set_sprite_scale(lerp(base_scale, target_scale, progress))
 				
 		State.LANE_PUSH:
-			velocity = Vector2(move_speed * move_dir, 0)
+			velocity = Vector2(data.move_speed * move_dir, 0)
 			_set_sprite_scale(target_scale)
-			
 			if sprite is AnimatedSprite2D and sprite.animation != "walk":
 				sprite.play("walk")
+			
+			# Optional: Allow firing on the move if target is valid
+			if is_instance_valid(current_target): _fire_weapons()
 				
 		State.ATTACK:
 			velocity = Vector2.ZERO 
-			attack_timer -= delta
-			
 			if sprite is AnimatedSprite2D and sprite.animation != "aim":
 				sprite.play("aim")
-			
-			if attack_timer <= 0.0:
-				attack_timer = attack_cooldown
-				if is_instance_valid(current_target):
-					current_target.take_damage(damage, damage_type)
 
 	move_and_slide()
