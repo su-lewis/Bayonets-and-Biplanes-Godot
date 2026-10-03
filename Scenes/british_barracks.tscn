@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bucr1vu21msgf"]
 
 [ext_resource type="Texture2D" uid="uid://cafsxh37516m" path="res://Assets/barracks_british.png" id="1_h6s86"]
-[ext_resource type="Texture2D" uid="uid://ckkubnur7m6o1" path="res://Assets/barracks_spawner_interior.png" id="2_nx6i6"]
 
 [node name="Barracks" type="Sprite2D" unique_id=2036913953]
 z_as_relative = false
@@ -10,7 +9,3 @@ texture = ExtResource("1_h6s86")
 
 [node name="InfantryMarker" type="Marker2D" parent="." unique_id=1781454727]
 position = Vector2(-40, 612)
-
-[node name="Behind" type="Sprite2D" parent="." unique_id=1314875975]
-visible = false
-texture = ExtResource("2_nx6i6")
