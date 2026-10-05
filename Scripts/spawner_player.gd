@@ -92,3 +92,25 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
 		new_unit.target_lane_y = final_target_y
 		new_unit.start_x = spawn_point.global_position.x 
 		new_unit.target_scale = new_unit.base_scale * lerp(0.70, 1.00, weight)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		var mouse_pos = get_global_mouse_position()
+		var clicked_lane = null
+		
+		# Find exactly which lane's mud we are clicking inside
+		for lane in ground_lanes:
+			var ground_node = lane.get_node_or_null("DestructibleGround")
+			if ground_node:
+				# Calculate the true top and bottom of this specific lane's mud on the screen
+				var top_edge = lane.global_position.y + ground_node.base_ground_level
+				var bottom_edge = top_edge + ground_node.lane_thickness
+				
+				# Check if the mouse is inside this exact vertical box
+				if mouse_pos.y >= top_edge and mouse_pos.y <= bottom_edge:
+					clicked_lane = lane
+					break # We found the exact lane, stop looking!
+				
+		# Dig the crater
+		if clicked_lane and clicked_lane.has_node("DestructibleGround"):
+			clicked_lane.get_node("DestructibleGround").blow_crater(mouse_pos.x, 120, 40)

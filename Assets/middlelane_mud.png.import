@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ccvjxommq2i58"
-path="res://.godot/imported/bottom.png-f441ba9cb3ca49a790aa1169324d237f.ctex"
+uid="uid://chlt27iap4c36"
+path="res://.godot/imported/middlelane_mud.png-3b80013f2170142ecd08ddecd5bcf4b8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/bottom.png"
-dest_files=["res://.godot/imported/bottom.png-f441ba9cb3ca49a790aa1169324d237f.ctex"]
+source_file="res://Assets/middlelane_mud.png"
+dest_files=["res://.godot/imported/middlelane_mud.png-3b80013f2170142ecd08ddecd5bcf4b8.ctex"]
 
 [params]
 

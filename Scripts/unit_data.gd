@@ -19,4 +19,6 @@ enum SpawnFacility { BARRACKS, FACTORY, HANGAR }
 @export var move_speed: float = 50.0
 @export var walk_out_distance: float = 120.0
 @export var is_flying: bool = false
-@export var is_vehicle: bool = false # <--- NEW TOGGLE
+@export var is_vehicle: bool = false
+@export var weight_tons: float = 28.0 # Mark I was heavily armored
+@export var engine_power: float = 400.0 # The raw pushing force (Torque/HP)

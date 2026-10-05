@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c57wdcormt6nc"
-path="res://.godot/imported/top.png-e6ac22684bd8fb5fb9332140beac38f7.ctex"
+uid="uid://cts2xi7m5hg86"
+path="res://.godot/imported/toplane_mud.png-7502cbf671f6925f8bd5d274df5d7b63.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/top.png"
-dest_files=["res://.godot/imported/top.png-e6ac22684bd8fb5fb9332140beac38f7.ctex"]
+source_file="res://Assets/toplane_mud.png"
+dest_files=["res://.godot/imported/toplane_mud.png-7502cbf671f6925f8bd5d274df5d7b63.ctex"]
 
 [params]
 
