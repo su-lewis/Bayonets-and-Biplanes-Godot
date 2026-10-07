@@ -26,12 +26,16 @@ var chunks: Array[Polygon2D] = []
 var dirty_chunks: Dictionary = {}
 
 func _ready() -> void:
-	self.color.a = 0.0 
-	if not Engine.is_editor_hint():
-		_force_rebuild()
+	if Engine.is_editor_hint():
+		self.color.a = 1.0 # Keep visible in Editor
+	else:
+		self.color.a = 0.0 # Hide parent in Game (Chunks will take over)
+		
+	_force_rebuild()
 
 func _physics_process(_delta: float) -> void:
-	# Updates visual chunks instantly and cleanly without lagging the CPU!
+	if Engine.is_editor_hint(): return # Don't run chunk updates in Editor
+	
 	if dirty_chunks.size() > 0:
 		for chunk_idx in dirty_chunks.keys():
 			_update_chunk(chunk_idx)
@@ -66,21 +70,61 @@ func _force_rebuild() -> void:
 		height_map.resize(map_width)
 	height_map.fill(base_ground_level) 
 	
-	for c in chunks:
-		if is_instance_valid(c): c.queue_free()
-	chunks.clear()
-	dirty_chunks.clear()
-	
-	var num_chunks = ceili(float(map_width) / float(chunk_size_px))
-	for i in range(num_chunks):
-		var chunk_poly = Polygon2D.new()
-		chunk_poly.texture = self.texture
-		chunk_poly.texture_repeat = Polygon2D.TEXTURE_REPEAT_ENABLED
-		chunk_poly.color = Color(1, 1, 1, 1) 
-		add_child(chunk_poly)
-		chunks.append(chunk_poly)
-		dirty_chunks[i] = true
+	if Engine.is_editor_hint():
+		# EDITOR: Draw one massive polygon so you can see it and the Orange Line matches
+		_update_main_editor_polygon()
+	else:
+		# GAME: Empty the parent polygon and spawn the high-performance chunks
+		self.polygon = PackedVector2Array() 
+		
+		for c in chunks:
+			if is_instance_valid(c): c.queue_free()
+		chunks.clear()
+		dirty_chunks.clear()
+		
+		var num_chunks = ceili(float(map_width) / float(chunk_size_px))
+		for i in range(num_chunks):
+			var chunk_poly = Polygon2D.new()
+			chunk_poly.texture = self.texture
+			chunk_poly.texture_repeat = Polygon2D.TEXTURE_REPEAT_ENABLED
+			chunk_poly.color = Color(1, 1, 1, 1) # Guaranteed to be visible!
+			chunk_poly.z_index = self.z_index
+			add_child(chunk_poly)
+			chunks.append(chunk_poly)
+			
+			# Force it to build instantly so it doesn't blink on spawn
+			_update_chunk(i) 
 
+# --- EDITOR ONLY DRAWING ---
+func _update_main_editor_polygon() -> void:
+	if height_map.is_empty(): return
+	var points = PackedVector2Array()
+	var uvs = PackedVector2Array()
+	
+	for x in range(0, map_width, visual_resolution):
+		var current_y = height_map[x]
+		var point = Vector2(x, current_y)
+		points.append(point)
+		uvs.append(point / custom_texture_scale)
+		
+	var final_point = Vector2(map_width - 1, height_map[map_width - 1])
+	points.append(final_point)
+	uvs.append(final_point / custom_texture_scale)
+		
+	var lane_bottom_y = base_ground_level + lane_thickness 
+	
+	var bottom_right = Vector2(map_width - 1, lane_bottom_y)
+	points.append(bottom_right)
+	uvs.append(bottom_right / custom_texture_scale)
+	
+	var bottom_left = Vector2(0, lane_bottom_y)
+	points.append(bottom_left)
+	uvs.append(bottom_left / custom_texture_scale)
+	
+	self.polygon = points
+	self.uv = uvs
+
+# --- GAME CHUNK DRAWING ---
 func _update_chunk(chunk_idx: int) -> void:
 	if chunk_idx < 0 or chunk_idx >= chunks.size(): return
 	

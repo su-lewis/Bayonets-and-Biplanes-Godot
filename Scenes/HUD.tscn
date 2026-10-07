@@ -18,7 +18,7 @@ grow_vertical = 0
 color = Color(0.4412211, 0.49061358, 0, 1)
 
 [node name="UI top2" type="Node2D" parent="." unique_id=1042905429]
-position = Vector2(0, 990)
+position = Vector2(0, 1000)
 
 [node name="Label" type="Label" parent="." unique_id=30428898]
 offset_left = 460.0

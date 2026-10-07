@@ -4,17 +4,17 @@
 [ext_resource type="Script" uid="uid://nay6m4usp7i3" path="res://Scripts/unit_base.gd" id="2_c70vm"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_87ivd"]
-size = Vector2(184, 83.5)
+size = Vector2(238.5, 110.5)
 
 [node name="Biplane" type="CharacterBody2D" unique_id=1701208706]
 collision_layer = 4
 script = ExtResource("2_c70vm")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2137148591]
-scale = Vector2(0.1, 0.1)
+scale = Vector2(0.13, 0.13)
 texture = ExtResource("2_3hadi")
 offset = Vector2(0, -417)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=190208181]
-position = Vector2(-4, -42.25)
+position = Vector2(-5, -55)
 shape = SubResource("RectangleShape2D_87ivd")
