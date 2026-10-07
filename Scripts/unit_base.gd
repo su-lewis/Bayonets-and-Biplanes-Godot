@@ -20,14 +20,22 @@ var base_scale: float = 1.0
 var start_x: float = 0.0
 var start_y_for_scale: float = 0.0 
 
-# --- VEHICLE PHYSICS VARIABLES ---
+# --- TRUE RIGID BODY VARIABLES ---
 var ground_node: Polygon2D = null
+var track_node: Node2D = null
 var vertical_velocity: float = 0.0
+var angular_velocity: float = 0.0 
 var current_traction: float = 1.0 
+var current_mud_sink_ratio: float = 0.0 
 var is_physically_stable: bool = true
+var gravity: float = 980.0
 
-# CHANGE THIS from 250.0 to 600.0 (or even 800.0 for massive weight)
-var gravity: float = 600.0
+# --- OPTIMIZATION VARIABLES ---
+var search_timer: float = 0.0
+var cached_poly: PackedVector2Array = []
+var tread_threshold: float = 0.0
+var cached_contact_fwd: float = 0.0
+var cached_contact_bwd: float = 0.0
 
 @onready var sprite = $Sprite2D
 
@@ -48,14 +56,41 @@ func _ready() -> void:
 	for weapon in data.weapons:
 		weapon_cooldowns[weapon] = 0.0
 		
-	# Flip the Track Polygon for enemies so it matches the texture
-	if is_enemy:
-		var track_shape = _get_track_shape()
-		if track_shape:
+	track_node = _get_track_shape()
+	if track_node:
+		if is_enemy:
 			var flipped_poly = PackedVector2Array()
-			for pt in track_shape.polygon:
+			for pt in track_node.polygon:
 				flipped_poly.append(Vector2(-pt.x, pt.y))
-			track_shape.polygon = flipped_poly
+			track_node.polygon = flipped_poly
+			
+		var old_rot = sprite.rotation
+		var old_scale = sprite.scale
+		sprite.rotation = 0.0
+		sprite.scale = Vector2.ONE
+		
+		sprite.force_update_transform()
+		if track_node is Node2D: track_node.force_update_transform()
+		
+		var lowest_y = -99999.0
+		for pt in track_node.polygon:
+			var global_pt = track_node.to_global(pt)
+			var local_pt = self.to_local(global_pt)
+			cached_poly.append(local_pt)
+			if local_pt.y > lowest_y: lowest_y = local_pt.y
+			
+		tread_threshold = lowest_y - 25.0 
+		cached_contact_fwd = -99999.0
+		cached_contact_bwd = 99999.0
+		
+		for pt in cached_poly:
+			var true_x = pt.x * move_dir
+			if pt.y >= tread_threshold:
+				if true_x > cached_contact_fwd: cached_contact_fwd = true_x
+				if true_x < cached_contact_bwd: cached_contact_bwd = true_x
+				
+		sprite.rotation = old_rot
+		sprite.scale = old_scale
 		
 	if data.is_vehicle:
 		var parent_lane = get_parent()
@@ -80,26 +115,22 @@ func _set_sprite_scale(s: float) -> void:
 
 func take_damage(amount: float, pen_mm: float, is_vital: bool) -> void:
 	var actual_damage = CombatResolver.calculate_damage(amount, pen_mm, data.armor_thickness_mm, is_vital)
-	
 	if actual_damage > 0:
 		current_hp -= actual_damage
 		if sprite:
 			sprite.modulate = Color.RED
 			get_tree().create_timer(0.1).timeout.connect(func(): if is_instance_valid(sprite): sprite.modulate = Color.WHITE)
-			
 	if current_hp <= 0:
 		queue_free()
 
 func _find_target() -> void:
 	var enemy_group = "player_units" if is_enemy else "enemy_units"
 	var closest_enemy: BaseUnit = null
-	
 	var max_range: float = 0.0
 	for w in data.weapons:
 		if w.attack_range > max_range: max_range = w.attack_range
 		
 	var closest_dist: float = max_range
-	
 	for enemy in get_tree().get_nodes_in_group(enemy_group):
 		if not is_instance_valid(enemy) or enemy.is_queued_for_deletion(): continue
 		if enemy.data.is_flying != self.data.is_flying: continue 
@@ -109,7 +140,6 @@ func _find_target() -> void:
 		if dist_in_front > 0.0 and dist_in_front <= closest_dist:
 			closest_dist = dist_in_front
 			closest_enemy = enemy
-			
 	current_target = closest_enemy
 
 func _fire_weapons() -> void:
@@ -120,16 +150,13 @@ func _fire_weapons() -> void:
 	for weapon in data.weapons:
 		if weapon_cooldowns[weapon] <= 0.0 and dist <= weapon.attack_range:
 			weapon_cooldowns[weapon] = weapon.fire_rate
-			
 			var hit_chance = weapon.base_accuracy
 			if is_moving: hit_chance -= weapon.moving_accuracy_penalty
-			
 			var dice_roll = randf()
 			var is_hit = dice_roll <= hit_chance
 			var is_vital = dice_roll <= weapon.vital_hit_chance
 			
 			_spawn_tracer(current_target, is_hit)
-			
 			if is_hit:
 				current_target.take_damage(weapon.damage, weapon.penetration_mm, is_vital)
 
@@ -137,7 +164,6 @@ func _spawn_tracer(target: BaseUnit, is_hit: bool) -> void:
 	var tracer = Line2D.new()
 	tracer.width = 1.0
 	tracer.default_color = Color(1.0, 0.9, 0.5, 0.8) 
-	
 	var start_pos = global_position + Vector2(10 * move_dir, -10)
 	var end_pos = target.global_position + Vector2(0, -10)
 	
@@ -149,15 +175,14 @@ func _spawn_tracer(target: BaseUnit, is_hit: bool) -> void:
 	tracer.add_point(start_pos)
 	tracer.add_point(end_pos)
 	get_tree().current_scene.add_child(tracer)
-	
 	var tween = create_tween()
 	tween.tween_property(tracer, "modulate:a", 0.0, 0.1)
 	tween.tween_callback(tracer.queue_free)
 
 func _physics_process(delta: float) -> void:
+	if search_timer > 0.0: search_timer -= delta
 	for weapon in weapon_cooldowns.keys():
-		if weapon_cooldowns[weapon] > 0.0:
-			weapon_cooldowns[weapon] -= delta
+		if weapon_cooldowns[weapon] > 0.0: weapon_cooldowns[weapon] -= delta
 
 	if data.is_flying:
 		global_position.x += (data.move_speed * move_dir) * delta
@@ -168,7 +193,9 @@ func _physics_process(delta: float) -> void:
 
 	if current_state == State.LANE_PUSH:
 		if not is_instance_valid(current_target):
-			_find_target()
+			if search_timer <= 0.0:
+				_find_target()
+				search_timer = 0.25 
 		else:
 			current_state = State.ATTACK 
 
@@ -180,7 +207,6 @@ func _physics_process(delta: float) -> void:
 			var max_range: float = 0.0
 			for w in data.weapons:
 				if w.attack_range > max_range: max_range = w.attack_range
-			
 			if dist < 0.0 or dist > max_range:
 				current_target = null
 				current_state = State.LANE_PUSH
@@ -215,17 +241,21 @@ func _physics_process(delta: float) -> void:
 				var pitch_angle = sprite.rotation * move_dir
 				var slope_gravity = sin(pitch_angle) * data.weight_tons * 15.0 
 				
-				var steepness_penalty = 1.0
-				if pitch_angle < -0.6: 
-					# Changed clamp min to 0.2 (20% power minimum) so they don't get fully stuck on steep walls
-					steepness_penalty = clamp(1.0 - (abs(pitch_angle) - 0.6) * 2.0, 0.2, 1.0)
-					
-				var traction = 1.0 if is_physically_stable else 0.4
-				var net_forward = (data.engine_power * traction * steepness_penalty) + slope_gravity
+				# Only apply mud drag on flat ground! Steep hills need full engine power.
+				var mud_drag = 1.0
+				if pitch_angle > -0.2: 
+					mud_drag = 1.0 - (current_mud_sink_ratio * 0.4)
+				
+				var net_forward = (data.engine_power * current_traction * mud_drag) + slope_gravity
 				var final_speed = clamp(net_forward, -data.move_speed * 0.5, data.move_speed)
 				
-				var forward_vector = Vector2(move_dir, 0).rotated(sprite.rotation)
-				velocity = forward_vector * final_speed
+				# THE CRAWLER GEAR: Fixes the Stall-Out bug entirely!
+				# As long as the tank has traction, it will never be stopped by gravity/slopes!
+				if final_speed < (data.move_speed * 0.2) and current_traction >= 0.5:
+					final_speed = data.move_speed * 0.2
+				
+				var horizontal_speed = final_speed * cos(sprite.rotation)
+				velocity = Vector2(horizontal_speed * move_dir, 0.0)
 			else:
 				velocity = Vector2(data.move_speed * move_dir, 0)
 				
@@ -244,115 +274,106 @@ func _physics_process(delta: float) -> void:
 	if data.is_vehicle and is_instance_valid(ground_node):
 		_apply_vehicle_physics(delta)
 
-# --- WW1 RHOMBOID VEHICLE PHYSICS (STABLE HYBRID) ---
+# --- TRUE RIGID BODY SIMULATOR ---
 func _apply_vehicle_physics(delta: float) -> void:
-	var track_shape = _get_track_shape()
-	if not track_shape or not ground_node: return
-	
-	var load_bearing_pts = []
-	var max_belly_pen = -9999.0
-	
-	var max_forward = 0.0
-	var max_backward = 0.0
+	if cached_poly.is_empty() or not ground_node: return
 
-	# 1. FIND TANK DIMENSIONS
-	for pt in track_shape.polygon:
-		var true_x = pt.x * move_dir
-		if true_x > max_forward: max_forward = true_x
-		if true_x < max_backward: max_backward = true_x
-
-	var belly_limit = max_forward * 0.60 
-
-	# 2. EXACT RIGID BODY COLLISION SCANNING (Y-AXIS ONLY)
-	for pt in track_shape.polygon:
-		var true_x = pt.x * move_dir
-		var global_pt = track_shape.to_global(pt)
-		var local_x = ground_node.to_local(global_pt).x
-		var exact_height = ground_node.get_exact_height(local_x)
-		var dirt_y = ground_node.to_global(Vector2(local_x, exact_height)).y
-		
-		var penetration = global_pt.y - dirt_y 
-		
-		if penetration > 0.0:
-			load_bearing_pts.append(global_pt)
-			
-		# ONLY the belly can lift the tank vertically! (Prevents nose levitation)
-		if abs(true_x) <= belly_limit:
-			if penetration > max_belly_pen: 
-				max_belly_pen = penetration
-
-	# 3. TERRAIN GRINDING (Chews steep walls into ramps)
-	if load_bearing_pts.size() > 0 and load_bearing_pts.size() <= 4:
-		var needs_visual_update = false
-		var max_allowed_y = ground_node.base_ground_level + ground_node.lane_thickness - 10.0
-		for p in load_bearing_pts:
-			var center_x = int(ground_node.to_local(p).x)
-			var radius = 20 
-			var start_x = maxi(0, center_x - radius)
-			var end_x = mini(ground_node.map_width - 1, center_x + radius)
-			
-			for x in range(start_x, end_x):
-				var dist = abs(x - center_x)
-				var slope = 1.0 - (float(dist) / radius)
-				var depth = (data.weight_tons * 2.0 * delta * slope) / load_bearing_pts.size()
-				ground_node.height_map[x] = min(ground_node.height_map[x] + depth, max_allowed_y)
-			needs_visual_update = true
-		if needs_visual_update:
-			ground_node.mark_dirty()
-
-	# 4. Y-POSITION: DRIVEN STRICTLY BY THE BELLY 
-	# Buffer perfectly scales: 10px, 8.5px, 7px!
 	var buffer = 10.0 * target_scale
-	is_physically_stable = max_belly_pen > -buffer
+
+	# 1. KINEMATIC MOMENTUM
+	vertical_velocity += gravity * delta
+	global_position.y += vertical_velocity * delta
+	sprite.rotation += angular_velocity * delta
+
+	# 2. CONTINUOUS DYNAMIC SENSORS 
+	var max_tread_pen = -9999.0
+	var max_bumper_pen = -9999.0
 	
-	if not is_physically_stable:
-		vertical_velocity += gravity * delta
-		vertical_velocity = min(vertical_velocity, 500.0) 
-		global_position.y += vertical_velocity * delta
+	var max_f_pen = -9999.0
+	var max_b_pen = -9999.0
+	var f_contact_pos = Vector2.ZERO
+	var b_contact_pos = Vector2.ZERO
+
+	for pt in cached_poly:
+		var scaled_pt = pt * target_scale
+		var rotated_pt = scaled_pt.rotated(sprite.rotation)
+		var global_x = global_position.x + rotated_pt.x
+		var global_y = global_position.y + rotated_pt.y
+		var local_x = ground_node.to_local(Vector2(global_x, 0)).x
+		var dirt_y = ground_node.to_global(Vector2(0, ground_node.get_exact_height(local_x))).y
+		
+		var penetration = global_y - dirt_y
+		var true_x = pt.x * move_dir
+		
+		if pt.y >= tread_threshold: 
+			if penetration > max_tread_pen: 
+				max_tread_pen = penetration
+				
+			if true_x > 0:
+				if penetration > max_f_pen:
+					max_f_pen = penetration
+					f_contact_pos = Vector2(global_x, dirt_y)
+			else:
+				if penetration > max_b_pen:
+					max_b_pen = penetration
+					b_contact_pos = Vector2(global_x, dirt_y)
+		else:
+			if true_x > cached_contact_fwd: 
+				if penetration > max_bumper_pen: 
+					max_bumper_pen = penetration
+
+	# Engine Mud Drag Tracker
+	if max_tread_pen > 0.0:
+		current_mud_sink_ratio = clamp(max_tread_pen / buffer, 0.0, 1.0)
 	else:
+		current_mud_sink_ratio = 0.0
+
+	# 3. Y-POSITION & MUD SUSPENSION
+	is_physically_stable = max_tread_pen > -2.0
+	
+	if max_tread_pen > buffer:
+		global_position.y -= (max_tread_pen - buffer)
 		vertical_velocity = 0.0
-		# Strict 10px limit. Pushes up smoothly if too deep.
-		if max_belly_pen > buffer:
-			global_position.y -= (max_belly_pen - buffer) * (15.0 * delta)
-		elif max_belly_pen < 0.0:
-			global_position.y -= max_belly_pen * (15.0 * delta)
+	elif max_tread_pen > 0.0:
+		var mud_thickness = max_tread_pen / buffer
+		vertical_velocity = lerp(vertical_velocity, 0.0, 20.0 * mud_thickness * delta)
 
-	# 5. ROTATION: DECOUPLED TERRAIN SAMPLING (Anti-Spasm)
-	# By reading the absolute terrain height, the tank's current rotation cannot cause a feedback loop!
-	var f_x = global_position.x + (max_forward * 0.8 * target_scale * move_dir)
-	var c_x = global_position.x
-	var b_x = global_position.x + (max_backward * 0.8 * target_scale * move_dir)
+	# 4. ROTATION (Torsional Spring based on true highest contacts)
+	var target_angle = sprite.rotation 
 
-	var yF = ground_node.to_global(Vector2(0, ground_node.get_exact_height(ground_node.to_local(Vector2(f_x, 0)).x))).y
-	var yC = ground_node.to_global(Vector2(0, ground_node.get_exact_height(ground_node.to_local(Vector2(c_x, 0)).x))).y
-	var yB = ground_node.to_global(Vector2(0, ground_node.get_exact_height(ground_node.to_local(Vector2(b_x, 0)).x))).y
+	if max_f_pen > -10.0 and max_b_pen > -10.0:
+		var dx = abs(f_contact_pos.x - b_contact_pos.x)
+		if dx > 1.0: target_angle = atan2(f_contact_pos.y - b_contact_pos.y, dx) * move_dir
+	elif max_b_pen > -10.0:
+		target_angle = 1.0 * move_dir
+	elif max_f_pen > -10.0:
+		target_angle = -1.0 * move_dir
 
-	var dx = abs(f_x - c_x)
-	var target_angle = 0.0
+	# PROPORTIONAL OVERRIDE (Fixes the Bounce!)
+	# Instead of instantly snapping the angle by 1.0 (57 degrees), 
+	# it gently and proportionally lifts the nose based on how deep it hit the wall!
+	if max_bumper_pen > buffer:
+		var bumper_push = (max_bumper_pen - buffer) * 0.05
+		target_angle -= bumper_push * move_dir
 
-	if dx > 0.1:
-		# Calculate the 3 possible slopes the tank could rest on
-		var ang_BC = atan2(yC - yB, dx) * move_dir       # Resting on Back + Center
-		var ang_CF = atan2(yF - yC, dx) * move_dir       # Resting on Center + Front
-		var ang_BF = atan2(yF - yB, dx * 2.0) * move_dir # Bridging Back to Front
+	target_angle = clamp(target_angle, -1.0, 1.0)
 
-		var valid_angles = []
-		# Only allow angles that don't clip the tank through the floor
-		if (yB + 2.0 * (yC - yB)) <= yF + 5.0: valid_angles.append(ang_BC)
-		if (yF - 2.0 * (yF - yC)) <= yB + 5.0: valid_angles.append(ang_CF)
-		if ((yB + yF) / 2.0) <= yC + 5.0: valid_angles.append(ang_BF)
+	# 5. ANGULAR MOMENTUM (Vibration-Free Spring)
+	var angle_diff = target_angle - sprite.rotation
+	while angle_diff > PI: angle_diff -= PI * 2.0
+	while angle_diff < -PI: angle_diff += PI * 2.0
+	
+	if is_physically_stable:
+		# Softened spring force from 25.0 to 15.0 to heave smoothly and prevent jerking
+		var spring_force = angle_diff * 15.0
+		angular_velocity += spring_force * delta
+		angular_velocity = lerp(angular_velocity, 0.0, 15.0 * delta)
+	else:
+		angular_velocity += (angle_diff * 5.0) * delta
+		angular_velocity = lerp(angular_velocity, 0.0, 2.0 * delta)
 
-		# Of the valid angles, always pick the one that Pitches UP the most.
-		# This causes the tank to realistically rear up on its back tracks when hitting a steep wall!
-		if valid_angles.size() > 0:
-			target_angle = valid_angles[0]
-			for a in valid_angles:
-				if a < target_angle: target_angle = a 
+	sprite.rotation = clamp(sprite.rotation, -1.2, 1.2)
+	angular_velocity = clamp(angular_velocity, -3.0, 3.0)
 
-	target_angle = clamp(target_angle, -0.9, 0.9)
-
-	# 6. HEAVY, FAST FALLING LERP
-	# Increased from (5.0 / 2.0) to (10.0 / 6.0). 
-	# The tank will now snap to the terrain and violently pitch nose-down much faster!
-	var rot_weight = 10.0 if is_physically_stable else 6.0
-	sprite.rotation = lerp_angle(sprite.rotation, target_angle, 1.0 - exp(-rot_weight * delta))
+	# 6. TRACTION
+	current_traction = 1.0 if is_physically_stable else 0.2

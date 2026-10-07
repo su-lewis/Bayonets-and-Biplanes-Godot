@@ -20,57 +20,30 @@ var height_map: PackedFloat32Array = []
 var visual_resolution: int = 20 
 var custom_texture_scale: float = 0.25 
 
-# CPU PERFORMANCE BATCHING FLAG
-var _is_dirty: bool = false
+# --- CHUNKING OPTIMIZATION ---
+var chunk_size_px: int = 2000
+var chunks: Array[Polygon2D] = []
+var dirty_chunks: Dictionary = {}
 
 func _ready() -> void:
+	self.color.a = 0.0 
 	if not Engine.is_editor_hint():
 		_force_rebuild()
 
 func _physics_process(_delta: float) -> void:
-	if _is_dirty:
-		update_visual_polygon()
-		_is_dirty = false
+	# Updates visual chunks instantly and cleanly without lagging the CPU!
+	if dirty_chunks.size() > 0:
+		for chunk_idx in dirty_chunks.keys():
+			_update_chunk(chunk_idx)
+		dirty_chunks.clear()
 
-func mark_dirty() -> void:
-	_is_dirty = true
-
-func _force_rebuild() -> void:
-	if height_map.size() != map_width:
-		height_map.resize(map_width)
-		
-	height_map.fill(base_ground_level) 
-	update_visual_polygon()
-
-func update_visual_polygon() -> void:
-	if height_map.is_empty(): return
+func mark_region_dirty(start_x: int, end_x: int) -> void:
+	if chunks.is_empty(): return
+	var start_chunk = clampi(start_x / chunk_size_px, 0, chunks.size() - 1)
+	var end_chunk = clampi(end_x / chunk_size_px, 0, chunks.size() - 1)
 	
-	var points = PackedVector2Array()
-	var uvs = PackedVector2Array()
-	
-	for x in range(0, map_width, visual_resolution):
-		var current_y = height_map[x]
-		var point = Vector2(x, current_y)
-		points.append(point)
-		uvs.append(point / custom_texture_scale)
-		
-	var final_x = map_width - 1
-	var final_point = Vector2(final_x, height_map[final_x])
-	points.append(final_point)
-	uvs.append(final_point / custom_texture_scale)
-		
-	var lane_bottom_y = base_ground_level + lane_thickness 
-	var bottom_right = Vector2(map_width, lane_bottom_y)
-	var bottom_left = Vector2(0, lane_bottom_y)
-	
-	points.append(bottom_right)
-	uvs.append(bottom_right / custom_texture_scale)
-	
-	points.append(bottom_left)
-	uvs.append(bottom_left / custom_texture_scale)
-	
-	self.polygon = points
-	self.uv = uvs
+	for i in range(start_chunk, end_chunk + 1):
+		dirty_chunks[i] = true
 
 func blow_crater(hit_x_global: float, radius: int, max_depth: float) -> void:
 	var center_x = int(to_local(Vector2(hit_x_global, 0)).x)
@@ -86,21 +59,68 @@ func blow_crater(hit_x_global: float, radius: int, max_depth: float) -> void:
 		
 		height_map[x] = min(height_map[x] + depth_to_add, max_allowed_y)
 			
-	mark_dirty()
+	mark_region_dirty(start_x, end_x)
 
-# SUB-PIXEL TERRAIN READING (Perfectly synced with Visuals)
+func _force_rebuild() -> void:
+	if height_map.size() != map_width:
+		height_map.resize(map_width)
+	height_map.fill(base_ground_level) 
+	
+	for c in chunks:
+		if is_instance_valid(c): c.queue_free()
+	chunks.clear()
+	dirty_chunks.clear()
+	
+	var num_chunks = ceili(float(map_width) / float(chunk_size_px))
+	for i in range(num_chunks):
+		var chunk_poly = Polygon2D.new()
+		chunk_poly.texture = self.texture
+		chunk_poly.texture_repeat = Polygon2D.TEXTURE_REPEAT_ENABLED
+		chunk_poly.color = Color(1, 1, 1, 1) 
+		add_child(chunk_poly)
+		chunks.append(chunk_poly)
+		dirty_chunks[i] = true
+
+func _update_chunk(chunk_idx: int) -> void:
+	if chunk_idx < 0 or chunk_idx >= chunks.size(): return
+	
+	var start_x = chunk_idx * chunk_size_px
+	var end_x = mini(start_x + chunk_size_px, map_width - 1)
+	
+	var points = PackedVector2Array()
+	var uvs = PackedVector2Array()
+	
+	for x in range(start_x, end_x, visual_resolution):
+		var current_y = height_map[x]
+		var point = Vector2(x, current_y)
+		points.append(point)
+		uvs.append(point / custom_texture_scale)
+		
+	var final_point = Vector2(end_x, height_map[end_x])
+	points.append(final_point)
+	uvs.append(final_point / custom_texture_scale)
+		
+	var lane_bottom_y = base_ground_level + lane_thickness 
+	
+	var bottom_right = Vector2(end_x, lane_bottom_y)
+	points.append(bottom_right)
+	uvs.append(bottom_right / custom_texture_scale)
+	
+	var bottom_left = Vector2(start_x, lane_bottom_y)
+	points.append(bottom_left)
+	uvs.append(bottom_left / custom_texture_scale)
+	
+	chunks[chunk_idx].polygon = points
+	chunks[chunk_idx].uv = uvs
+
 func get_exact_height(local_x: float) -> float:
 	if height_map.is_empty(): return base_ground_level
 	
 	var clamped_x = clamp(local_x, 0.0, float(map_width - 1))
-	
-	# We must calculate the slope using the EXACT same 20px steps the polygon draws with!
 	var floor_x = int(clamped_x / visual_resolution) * visual_resolution
 	var ceil_x = int(min(floor_x + visual_resolution, map_width - 1))
 	
-	if floor_x == ceil_x:
-		return height_map[floor_x]
+	if floor_x == ceil_x: return height_map[floor_x]
 		
-	# Interpolate along the visual straight line
 	var weight = (clamped_x - float(floor_x)) / float(ceil_x - floor_x)
 	return lerp(height_map[floor_x], height_map[ceil_x], weight)
