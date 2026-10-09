@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://bmnydart7i0r7"]
+
+[ext_resource type="Script" uid="uid://bo4ypw7kpylbu" path="res://trench.gd" id="1_yrw1n"]
+
+[node name="Node2D" type="Node2D" unique_id=434596820]
+
+[node name="Area2D" type="Area2D" parent="." unique_id=70192278]
+script = ExtResource("1_yrw1n")

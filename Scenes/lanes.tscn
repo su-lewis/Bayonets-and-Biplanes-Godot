@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://b6cm8nqyp6odk"]
 
 [ext_resource type="Texture2D" uid="uid://cts2xi7m5hg86" path="res://Assets/toplane_mud.png" id="1_ofoup"]
-[ext_resource type="Script" uid="uid://b7cenmnoqif7y" path="res://Scripts/DestructibleGround.gd" id="2_xhucn"]
+[ext_resource type="Script" uid="uid://b7cenmnoqif7y" path="res://Scripts/destructible_ground.gd" id="2_xhucn"]
 [ext_resource type="Texture2D" uid="uid://chlt27iap4c36" path="res://Assets/middlelane_mud.png" id="3_0o2pu"]
 [ext_resource type="Texture2D" uid="uid://cmd02fjl27hy8" path="res://Assets/bottomlane_mud.png" id="4_k0gw0"]
 

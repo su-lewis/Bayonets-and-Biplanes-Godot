@@ -1,32 +1,37 @@
 extends CharacterBody2D
 class_name BaseUnit
 
-enum State { ROLLOUT, DIAGONAL_PUSH, LANE_PUSH, ATTACK }
+enum State { ROLLOUT, DIAGONAL_PUSH, LANE_PUSH, ATTACK, MOVE_TO_BUILD, DIGGING, GARRISONED }
 
-@export var data: UnitData 
+@export var data: UnitData
 
 var current_hp: float
 var is_enemy: bool = false
-var move_dir: float = 1.0 
+var move_dir: float = 1.0
 var lane_id: int = 0
-var current_state: State = State.ROLLOUT 
+var current_state: State = State.ROLLOUT
 
 var weapon_cooldowns: Dictionary = {}
 var current_target: BaseUnit = null
 
-var target_lane_y: float = 0.0 
-var target_scale: float = 1.0 
-var base_scale: float = 1.0  
+var target_lane_y: float = 0.0
+var target_scale: float = 1.0
+var base_scale: float = 1.0
 var start_x: float = 0.0
-var start_y_for_scale: float = 0.0 
+var start_y_for_scale: float = 0.0
+
+# --- SAPPER VARIABLES ---
+var is_sapper: bool = false
+var build_target_x: float = 0.0
+var built_trench: Node2D = null
 
 # --- TRUE RIGID BODY VARIABLES ---
 var ground_node: Polygon2D = null
 var track_node: Node2D = null
 var vertical_velocity: float = 0.0
-var angular_velocity: float = 0.0 
-var current_traction: float = 1.0 
-var current_mud_sink_ratio: float = 0.0 
+var angular_velocity: float = 0.0
+var current_traction: float = 1.0
+var current_mud_sink_ratio: float = 0.0
 var is_physically_stable: bool = true
 var gravity: float = 980.0
 
@@ -44,7 +49,7 @@ func _ready() -> void:
 	current_hp = data.max_hp
 	start_x = global_position.x
 	start_y_for_scale = global_position.y
-	
+
 	if sprite: 
 		base_scale = abs(sprite.scale.x)
 		if is_equal_approx(target_scale, 1.0):
@@ -52,9 +57,12 @@ func _ready() -> void:
 		
 	move_dir = -1.0 if is_enemy else 1.0
 	add_to_group("enemy_units" if is_enemy else "player_units")
-	
+
 	for weapon in data.weapons:
 		weapon_cooldowns[weapon] = 0.0
+		
+	if is_sapper:
+		current_state = State.MOVE_TO_BUILD
 		
 	track_node = _get_track_shape()
 	if track_node:
@@ -92,7 +100,7 @@ func _ready() -> void:
 		sprite.rotation = old_rot
 		sprite.scale = old_scale
 		
-	if data.is_vehicle:
+	if data.is_vehicle or is_sapper:
 		var parent_lane = get_parent()
 		if parent_lane and parent_lane.has_node("DestructibleGround"):
 			ground_node = parent_lane.get_node("DestructibleGround")
@@ -115,6 +123,10 @@ func _set_sprite_scale(s: float) -> void:
 
 func take_damage(amount: float, pen_mm: float, is_vital: bool) -> void:
 	var actual_damage = CombatResolver.calculate_damage(amount, pen_mm, data.armor_thickness_mm, is_vital)
+	
+	if current_state == State.GARRISONED:
+		actual_damage *= 0.5 # Sappers get 50% damage reduction in trenches!
+		
 	if actual_damage > 0:
 		current_hp -= actual_damage
 		if sprite:
@@ -145,7 +157,7 @@ func _find_target() -> void:
 func _fire_weapons() -> void:
 	if not is_instance_valid(current_target): return
 	var dist = abs(current_target.global_position.x - global_position.x)
-	var is_moving = (current_state != State.ATTACK)
+	var is_moving = (current_state != State.ATTACK and current_state != State.GARRISONED)
 	
 	for weapon in data.weapons:
 		if weapon_cooldowns[weapon] <= 0.0 and dist <= weapon.attack_range:
@@ -163,7 +175,7 @@ func _fire_weapons() -> void:
 func _spawn_tracer(target: BaseUnit, is_hit: bool) -> void:
 	var tracer = Line2D.new()
 	tracer.width = 1.0
-	tracer.default_color = Color(1.0, 0.9, 0.5, 0.8) 
+	tracer.default_color = Color(1.0, 0.9, 0.5, 0.8)
 	var start_pos = global_position + Vector2(10 * move_dir, -10)
 	var end_pos = target.global_position + Vector2(0, -10)
 	
@@ -191,13 +203,14 @@ func _physics_process(delta: float) -> void:
 	if is_instance_valid(current_target) and current_target.is_queued_for_deletion():
 		current_target = null
 
-	if current_state == State.LANE_PUSH:
+	if current_state in [State.LANE_PUSH, State.GARRISONED]:
 		if not is_instance_valid(current_target):
 			if search_timer <= 0.0:
 				_find_target()
 				search_timer = 0.25 
 		else:
-			current_state = State.ATTACK 
+			if current_state != State.GARRISONED:
+				current_state = State.ATTACK 
 
 	if current_state == State.ATTACK:
 		if not is_instance_valid(current_target):
@@ -219,7 +232,10 @@ func _physics_process(delta: float) -> void:
 			if (not is_enemy and global_position.x >= start_x + data.walk_out_distance) or \
 			   (is_enemy and global_position.x <= start_x - data.walk_out_distance):
 				start_y_for_scale = global_position.y 
-				current_state = State.LANE_PUSH if data.is_vehicle else State.DIAGONAL_PUSH
+				if is_sapper:
+					current_state = State.MOVE_TO_BUILD
+				else:
+					current_state = State.LANE_PUSH if data.is_vehicle else State.DIAGONAL_PUSH
 				
 		State.DIAGONAL_PUSH:
 			var y_diff = target_lane_y - global_position.y
@@ -250,7 +266,6 @@ func _physics_process(delta: float) -> void:
 				var final_speed = clamp(net_forward, -data.move_speed * 0.5, data.move_speed)
 				
 				# THE CRAWLER GEAR: Fixes the Stall-Out bug entirely!
-				# As long as the tank has traction, it will never be stopped by gravity/slopes!
 				if final_speed < (data.move_speed * 0.2) and current_traction >= 0.5:
 					final_speed = data.move_speed * 0.2
 				
@@ -269,12 +284,47 @@ func _physics_process(delta: float) -> void:
 			if sprite is AnimatedSprite2D and sprite.animation != "aim":
 				sprite.play("aim")
 
+		# --- SAPPER STATES ---
+		State.MOVE_TO_BUILD:
+			velocity = Vector2(data.move_speed * move_dir, 0)
+			_set_sprite_scale(target_scale)
+			if sprite is AnimatedSprite2D and sprite.animation != "walk":
+				sprite.play("walk")
+				
+			if search_timer <= 0.0:
+				_find_target()
+				search_timer = 0.25 
+			if is_instance_valid(current_target): _fire_weapons()
+				
+			var dist_to_target = (build_target_x - global_position.x) * move_dir
+			if dist_to_target <= 5.0:
+				current_state = State.DIGGING
+				if sprite is AnimatedSprite2D: sprite.play("dig")
+				
+		State.DIGGING:
+			velocity = Vector2.ZERO
+			if is_instance_valid(ground_node):
+				var is_done = ground_node.carve_trench_step(global_position.x, 30, 20, 40.0, 20.0 * delta)
+				if built_trench:
+					built_trench.modulate.a = min(built_trench.modulate.a + (1.5 * delta), 1.0)
+				if is_done:
+					current_state = State.GARRISONED
+					
+		State.GARRISONED:
+			velocity = Vector2.ZERO
+			if is_instance_valid(current_target): 
+				_fire_weapons()
+				if sprite is AnimatedSprite2D and sprite.animation != "aim": sprite.play("aim")
+			else:
+				if sprite is AnimatedSprite2D and sprite.animation != "idle": sprite.play("idle")
+
 	move_and_slide()
-	
+
 	if data.is_vehicle and is_instance_valid(ground_node):
 		_apply_vehicle_physics(delta)
 
-# --- TRUE RIGID BODY SIMULATOR ---
+
+# --- TRUE RIGID BODY SIMULATOR (YOUR EXACT PASTED PHYSICS) ---
 func _apply_vehicle_physics(delta: float) -> void:
 	if cached_poly.is_empty() or not ground_node: return
 
@@ -288,11 +338,13 @@ func _apply_vehicle_physics(delta: float) -> void:
 	# 2. CONTINUOUS DYNAMIC SENSORS 
 	var max_tread_pen = -9999.0
 	var max_bumper_pen = -9999.0
-	
+
 	var max_f_pen = -9999.0
 	var max_b_pen = -9999.0
 	var f_contact_pos = Vector2.ZERO
 	var b_contact_pos = Vector2.ZERO
+	
+	var contact_pts = 0
 
 	for pt in cached_poly:
 		var scaled_pt = pt * target_scale
@@ -330,7 +382,7 @@ func _apply_vehicle_physics(delta: float) -> void:
 
 	# 3. Y-POSITION & MUD SUSPENSION
 	is_physically_stable = max_tread_pen > -2.0
-	
+
 	if max_tread_pen > buffer:
 		global_position.y -= (max_tread_pen - buffer)
 		vertical_velocity = 0.0
@@ -362,7 +414,7 @@ func _apply_vehicle_physics(delta: float) -> void:
 	var angle_diff = target_angle - sprite.rotation
 	while angle_diff > PI: angle_diff -= PI * 2.0
 	while angle_diff < -PI: angle_diff += PI * 2.0
-	
+
 	if is_physically_stable:
 		# Softened spring force from 25.0 to 15.0 to heave smoothly and prevent jerking
 		var spring_force = angle_diff * 15.0
