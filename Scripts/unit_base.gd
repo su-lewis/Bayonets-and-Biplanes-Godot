@@ -34,6 +34,7 @@ var current_traction: float = 1.0
 var current_mud_sink_ratio: float = 0.0
 var is_physically_stable: bool = true
 var gravity: float = 980.0
+var smoothed_target_angle: float = 0.0
 
 # --- OPTIMIZATION VARIABLES ---
 var search_timer: float = 0.0
@@ -304,7 +305,14 @@ func _physics_process(delta: float) -> void:
 		State.DIGGING:
 			velocity = Vector2.ZERO
 			if is_instance_valid(ground_node):
-				var is_done = ground_node.carve_trench_step(global_position.x, 30, 20, 40.0, 20.0 * delta)
+				# SCALED DIGGING: Multiplies dimensions by lane scale (0.7, 0.85, 1.0)
+				var flat_w = int(30 * target_scale)
+				var slope_w = int(20 * target_scale)
+				var depth = 40.0 * target_scale
+				var dig_spd = 20.0 * target_scale * delta
+				
+				var is_done = ground_node.carve_trench_step(global_position.x, flat_w, slope_w, depth, dig_spd)
+				
 				if built_trench:
 					built_trench.modulate.a = min(built_trench.modulate.a + (1.5 * delta), 1.0)
 				if is_done:
@@ -324,11 +332,11 @@ func _physics_process(delta: float) -> void:
 		_apply_vehicle_physics(delta)
 
 
-# --- TRUE RIGID BODY SIMULATOR (YOUR EXACT PASTED PHYSICS) ---
+# --- VEHICLE PHYSICS ---
 func _apply_vehicle_physics(delta: float) -> void:
 	if cached_poly.is_empty() or not ground_node: return
 
-	var buffer = 10.0 * target_scale
+	var buffer: float = 10.0 * target_scale
 
 	# 1. KINEMATIC MOMENTUM
 	vertical_velocity += gravity * delta
@@ -336,26 +344,23 @@ func _apply_vehicle_physics(delta: float) -> void:
 	sprite.rotation += angular_velocity * delta
 
 	# 2. CONTINUOUS DYNAMIC SENSORS 
-	var max_tread_pen = -9999.0
-	var max_bumper_pen = -9999.0
-
-	var max_f_pen = -9999.0
-	var max_b_pen = -9999.0
-	var f_contact_pos = Vector2.ZERO
-	var b_contact_pos = Vector2.ZERO
-	
-	var contact_pts = 0
+	var max_tread_pen: float = -9999.0
+	var max_bumper_pen: float = -9999.0
+	var max_f_pen: float = -9999.0
+	var max_b_pen: float = -9999.0
+	var f_contact_pos: Vector2 = Vector2.ZERO
+	var b_contact_pos: Vector2 = Vector2.ZERO
 
 	for pt in cached_poly:
-		var scaled_pt = pt * target_scale
-		var rotated_pt = scaled_pt.rotated(sprite.rotation)
-		var global_x = global_position.x + rotated_pt.x
-		var global_y = global_position.y + rotated_pt.y
-		var local_x = ground_node.to_local(Vector2(global_x, 0)).x
-		var dirt_y = ground_node.to_global(Vector2(0, ground_node.get_exact_height(local_x))).y
+		var scaled_pt: Vector2 = pt * target_scale
+		var rotated_pt: Vector2 = scaled_pt.rotated(sprite.rotation)
+		var global_x: float = global_position.x + rotated_pt.x
+		var global_y: float = global_position.y + rotated_pt.y
+		var local_x: float = ground_node.to_local(Vector2(global_x, 0)).x
+		var dirt_y: float = ground_node.to_global(Vector2(0, ground_node.get_exact_height(local_x))).y
 		
-		var penetration = global_y - dirt_y
-		var true_x = pt.x * move_dir
+		var penetration: float = global_y - dirt_y
+		var true_x: float = pt.x * move_dir
 		
 		if pt.y >= tread_threshold: 
 			if penetration > max_tread_pen: 
@@ -370,62 +375,60 @@ func _apply_vehicle_physics(delta: float) -> void:
 					max_b_pen = penetration
 					b_contact_pos = Vector2(global_x, dirt_y)
 		else:
-			if true_x > cached_contact_fwd: 
-				if penetration > max_bumper_pen: 
-					max_bumper_pen = penetration
+			if true_x > cached_contact_fwd and penetration > max_bumper_pen: 
+				max_bumper_pen = penetration
 
 	# Engine Mud Drag Tracker
-	if max_tread_pen > 0.0:
-		current_mud_sink_ratio = clamp(max_tread_pen / buffer, 0.0, 1.0)
-	else:
-		current_mud_sink_ratio = 0.0
+	current_mud_sink_ratio = clamp(max_tread_pen / buffer, 0.0, 1.0) if max_tread_pen > 0.0 else 0.0
 
-	# 3. Y-POSITION & MUD SUSPENSION
-	is_physically_stable = max_tread_pen > -2.0
+	# 3. Y-POSITION & MUD SUSPENSION (Added small stability hysteresis to prevent flickering)
+	if is_physically_stable:
+		is_physically_stable = max_tread_pen > -3.5 # Slightly wider threshold to stay stable
+	else:
+		is_physically_stable = max_tread_pen > -1.5
 
 	if max_tread_pen > buffer:
 		global_position.y -= (max_tread_pen - buffer)
 		vertical_velocity = 0.0
 	elif max_tread_pen > 0.0:
-		var mud_thickness = max_tread_pen / buffer
+		var mud_thickness: float = max_tread_pen / buffer
 		vertical_velocity = lerp(vertical_velocity, 0.0, 20.0 * mud_thickness * delta)
 
-	# 4. ROTATION (Torsional Spring based on true highest contacts)
-	var target_angle = sprite.rotation 
+	# 4. ROTATION (Calculates raw target angle based on ground slope)
+	var raw_target_angle: float = sprite.rotation 
 
 	if max_f_pen > -10.0 and max_b_pen > -10.0:
 		var dx = abs(f_contact_pos.x - b_contact_pos.x)
-		if dx > 1.0: target_angle = atan2(f_contact_pos.y - b_contact_pos.y, dx) * move_dir
+		if dx > 1.0: raw_target_angle = atan2(f_contact_pos.y - b_contact_pos.y, dx) * move_dir
 	elif max_b_pen > -10.0:
-		target_angle = 1.0 * move_dir
+		raw_target_angle = 1.0 * move_dir
 	elif max_f_pen > -10.0:
-		target_angle = -1.0 * move_dir
+		raw_target_angle = -1.0 * move_dir
 
-	# PROPORTIONAL OVERRIDE (Fixes the Bounce!)
-	# Instead of instantly snapping the angle by 1.0 (57 degrees), 
-	# it gently and proportionally lifts the nose based on how deep it hit the wall!
+	# PROPORTIONAL OVERRIDE
 	if max_bumper_pen > buffer:
 		var bumper_push = (max_bumper_pen - buffer) * 0.05
-		target_angle -= bumper_push * move_dir
+		raw_target_angle -= bumper_push * move_dir
 
-	target_angle = clamp(target_angle, -1.0, 1.0)
+	raw_target_angle = clamp(raw_target_angle, -1.2, 1.2)
 
-	# 5. ANGULAR MOMENTUM (Vibration-Free Spring)
-	var angle_diff = target_angle - sprite.rotation
-	while angle_diff > PI: angle_diff -= PI * 2.0
-	while angle_diff < -PI: angle_diff += PI * 2.0
+	# Slowed down the blending slightly to filter out micro-bumps from the ground grid
+	smoothed_target_angle = lerp_angle(smoothed_target_angle, raw_target_angle, 8.0 * delta)
+
+	# 5. ANGULAR MOMENTUM (Critically damped spring to eliminate vibration)
+	var angle_diff = smoothed_target_angle - sprite.rotation
 
 	if is_physically_stable:
-		# Softened spring force from 25.0 to 15.0 to heave smoothly and prevent jerking
-		var spring_force = angle_diff * 15.0
+		# Lowered spring force (12.0) and increased damping (22.0) to stop the chatter
+		var spring_force = angle_diff * 12.0
 		angular_velocity += spring_force * delta
-		angular_velocity = lerp(angular_velocity, 0.0, 15.0 * delta)
+		angular_velocity = lerp(angular_velocity, 0.0, 22.0 * delta)
 	else:
-		angular_velocity += (angle_diff * 5.0) * delta
-		angular_velocity = lerp(angular_velocity, 0.0, 2.0 * delta)
+		angular_velocity += (angle_diff * 4.0) * delta
+		angular_velocity = lerp(angular_velocity, 0.0, 4.0 * delta)
 
 	sprite.rotation = clamp(sprite.rotation, -1.2, 1.2)
-	angular_velocity = clamp(angular_velocity, -3.0, 3.0)
+	angular_velocity = clamp(angular_velocity, -2.5, 2.5)
 
 	# 6. TRACTION
 	current_traction = 1.0 if is_physically_stable else 0.2

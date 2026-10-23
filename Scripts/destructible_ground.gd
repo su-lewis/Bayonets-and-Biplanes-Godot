@@ -30,12 +30,11 @@ func _ready() -> void:
 		_force_rebuild()
 
 func _physics_process(_delta: float) -> void:
-	if Engine.is_editor_hint(): return 
+	if Engine.is_editor_hint() or dirty_chunks.is_empty(): return 
 	
-	if dirty_chunks.size() > 0:
-		for chunk_idx in dirty_chunks.keys():
-			_update_chunk(chunk_idx)
-		dirty_chunks.clear()
+	for chunk_idx in dirty_chunks.keys():
+		_update_chunk(chunk_idx)
+	dirty_chunks.clear()
 
 func mark_region_dirty(start_x: int, end_x: int) -> void:
 	if chunks.is_empty(): return
@@ -61,15 +60,13 @@ func blow_crater(hit_x_global: float, radius: int, max_depth: float) -> void:
 			
 	mark_region_dirty(start_x, end_x)
 
-# --- NEW: TRENCH DIGGING MATH ---
-# Carves a flat-bottomed Trapezium instead of a round crater!
+# --- CLEANED TRENCH DIGGING ---
 func carve_trench_step(hit_x_global: float, flat_width: int, slope_width: int, trench_depth: float, dig_speed: float) -> bool:
 	var center_x = int(to_local(Vector2(hit_x_global, 0)).x)
 	var start_x = maxi(0, center_x - flat_width - slope_width)
 	var end_x = mini(map_width - 1, center_x + flat_width + slope_width)
 	
 	var target_floor_y = base_ground_level + trench_depth
-	
 	var needs_visual_update = false
 	var is_finished = true 
 	
@@ -78,18 +75,18 @@ func carve_trench_step(hit_x_global: float, flat_width: int, slope_width: int, t
 		var target_y = base_ground_level
 		
 		if distance <= flat_width:
-			target_y = target_floor_y # Flat floor
+			target_y = target_floor_y 
 		else:
-			# Angled walls
 			var slope_pct = 1.0 - (float(distance - flat_width) / float(slope_width))
 			target_y = base_ground_level + (trench_depth * slope_pct)
 			
 		if height_map[x] < target_y:
 			height_map[x] = min(height_map[x] + dig_speed, target_y)
 			needs_visual_update = true
-			if height_map[x] < target_y:
-				is_finished = false
-				
+			
+		if height_map[x] < target_y:
+			is_finished = false
+			
 	if needs_visual_update:
 		mark_region_dirty(start_x, end_x)
 		
@@ -152,26 +149,35 @@ func _update_chunk(chunk_idx: int) -> void:
 	var start_x = chunk_idx * chunk_size_px
 	var end_x = mini(start_x + chunk_size_px, map_width - 1)
 	
+	# Pre-allocate array capacity to prevent constant reallocations during building
+	var point_count = ceili(float(end_x - start_x) / visual_resolution) + 3
 	var points = PackedVector2Array()
 	var uvs = PackedVector2Array()
+	points.resize(point_count)
+	uvs.resize(point_count)
 	
+	var idx = 0
 	for x in range(start_x, end_x, visual_resolution):
 		var current_y = height_map[x]
 		var point = Vector2(x, current_y)
-		points.append(point)
-		uvs.append(point / custom_texture_scale)
+		points[idx] = point
+		uvs[idx] = point / custom_texture_scale
+		idx += 1
 		
 	var final_point = Vector2(end_x, height_map[end_x])
-	points.append(final_point)
-	uvs.append(final_point / custom_texture_scale)
+	points[idx] = final_point
+	uvs[idx] = final_point / custom_texture_scale
+	idx += 1
 		
 	var lane_bottom_y = base_ground_level + lane_thickness 
 	var bottom_right = Vector2(end_x, lane_bottom_y)
-	points.append(bottom_right)
-	uvs.append(bottom_right / custom_texture_scale)
+	points[idx] = bottom_right
+	uvs[idx] = bottom_right / custom_texture_scale
+	idx += 1
+	
 	var bottom_left = Vector2(start_x, lane_bottom_y)
-	points.append(bottom_left)
-	uvs.append(bottom_left / custom_texture_scale)
+	points[idx] = bottom_left
+	uvs[idx] = bottom_left / custom_texture_scale
 	
 	chunks[chunk_idx].polygon = points
 	chunks[chunk_idx].uv = uvs
