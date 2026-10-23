@@ -191,3 +191,8 @@ func get_exact_height(local_x: float) -> float:
 	if floor_x == ceil_x: return height_map[floor_x]
 	var weight = (clamped_x - float(floor_x)) / float(ceil_x - floor_x)
 	return lerp(height_map[floor_x], height_map[ceil_x], weight)
+
+# --- CAMERA TRACKING HELPER ---
+func get_ground_bottom_y(_local_x: float = 0.0) -> float:
+	# Returns the absolute lowest Y-coordinate of this lane's solid bottom polygon
+	return base_ground_level + lane_thickness
