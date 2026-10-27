@@ -50,22 +50,22 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
 	var min_y: float = 400.0
 	var max_y: float = 990.0 
 	
-	# Pre-calculate the base lane so infantry squads stick together
 	var base_lane_idx = current_lane_index
 	current_lane_index = (current_lane_index + 1) % ordered_lanes.size()
 	
-	# Calculate infantry sub-lane (+30, +60, +90)
+	# Calculate infantry sub-lane offsets (+30, +60, +90)
 	var sub_offsets = [30.0, 60.0, 90.0]
 	var infantry_y_offset = 0.0
+	var assigned_sub_lane = 0
 	
 	if not unit_data.is_vehicle:
-		var sub_idx = lane_sub_indexes.get(base_lane_idx, 0)
-		infantry_y_offset = sub_offsets[sub_idx]
+		assigned_sub_lane = lane_sub_indexes.get(base_lane_idx, 0)
+		infantry_y_offset = sub_offsets[assigned_sub_lane]
 		# Cycle to the next sub-lane down for the next squad that spawns here
-		lane_sub_indexes[base_lane_idx] = (sub_idx + 1) % 3 
+		lane_sub_indexes[base_lane_idx] = (assigned_sub_lane + 1) % 3 
 		
 	for i in range(unit_data.squad_size):
-		var new_unit = unit_data.scene.instantiate()
+		var new_unit = unit_data.scene.instantiate() as BaseUnit
 		new_unit.data = unit_data
 		new_unit.is_enemy = is_enemy_team
 		
@@ -74,13 +74,16 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
 		var x_stagger = i * 45.0 * (-1 if is_enemy_team else 1)
 		
 		if unit_data.is_vehicle:
-			final_y_offset = 0.0 # Vehicles always hug the true top line of the lane
+			final_y_offset = 0.0 # Vehicles hug the true top line
+			new_unit.is_infantry = false
 			
-			# If multiple vehicles spawn, separate them into different main lanes entirely
 			if unit_data.squad_size > 1:
 				lane_idx = (base_lane_idx + i) % ordered_lanes.size()
-				x_stagger = 0.0 # No need to stagger X if they are in different lanes
-				
+				x_stagger = 0.0 
+		else:
+			new_unit.is_infantry = true
+			new_unit.infantry_sub_lane = assigned_sub_lane
+			
 		var chosen_lane = ordered_lanes[lane_idx]
 		new_unit.lane_id = lane_idx 
 		chosen_lane.add_child(new_unit)
@@ -98,19 +101,15 @@ func _input(event: InputEvent) -> void:
 		var mouse_pos = get_global_mouse_position()
 		var clicked_lane = null
 		
-		# Find exactly which lane's mud we are clicking inside
 		for lane in ground_lanes:
 			var ground_node = lane.get_node_or_null("DestructibleGround")
 			if ground_node:
-				# Calculate the true top and bottom of this specific lane's mud on the screen
 				var top_edge = lane.global_position.y + ground_node.base_ground_level
 				var bottom_edge = top_edge + ground_node.lane_thickness
 				
-				# Check if the mouse is inside this exact vertical box
 				if mouse_pos.y >= top_edge and mouse_pos.y <= bottom_edge:
 					clicked_lane = lane
-					break # We found the exact lane, stop looking!
+					break 
 				
-		# Dig the crater
 		if clicked_lane and clicked_lane.has_node("DestructibleGround"):
 			clicked_lane.get_node("DestructibleGround").blow_crater(mouse_pos.x, 120, 40)

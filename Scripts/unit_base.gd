@@ -2,8 +2,13 @@ extends CharacterBody2D
 class_name BaseUnit
 
 enum State { ROLLOUT, DIAGONAL_PUSH, LANE_PUSH, ATTACK, MOVE_TO_BUILD, DIGGING, GARRISONED }
+enum UnitType { TANK = 10, ARMORED_CAR = 50, INFANTRY = 100 }
 
+@export_category("Unit Data & Configuration")
 @export var data: UnitData
+@export var unit_type: UnitType = UnitType.TANK
+@export var is_infantry: bool = false
+@export_range(0, 2) var infantry_sub_lane: int = 0 
 
 var current_hp: float
 var is_enemy: bool = false
@@ -19,6 +24,10 @@ var target_scale: float = 1.0
 var base_scale: float = 1.0
 var start_x: float = 0.0
 var start_y_for_scale: float = 0.0
+
+# --- TIE-BREAKER Z-INDEXING ---
+static var global_spawn_counter: int = 0
+var assigned_tie_breaker: int = 0
 
 # --- SAPPER VARIABLES ---
 var is_sapper: bool = false
@@ -50,6 +59,18 @@ func _ready() -> void:
 	current_hp = data.max_hp
 	start_x = global_position.x
 	start_y_for_scale = global_position.y
+
+	# --- 1. EXPLICIT Z-INDEX & TIE-BREAKER LOCK ---
+	global_spawn_counter = (global_spawn_counter + 1) % 40
+	assigned_tie_breaker = global_spawn_counter
+
+	if is_infantry:
+		unit_type = UnitType.INFANTRY
+		# Lock depth bucket: Sub-lane layer + Tie-breaker (No local offset here, Spawner handles target_lane_y)
+		z_index = 200 + (infantry_sub_lane * 50) + assigned_tie_breaker
+	else:
+		# Lock vehicle depth bucket: Armored Cars always render on top of Tanks
+		z_index = int(unit_type) + assigned_tie_breaker
 
 	if sprite: 
 		base_scale = abs(sprite.scale.x)
@@ -258,7 +279,6 @@ func _physics_process(delta: float) -> void:
 				var pitch_angle = sprite.rotation * move_dir
 				var slope_gravity = sin(pitch_angle) * data.weight_tons * 15.0 
 				
-				# Only apply mud drag on flat ground! Steep hills need full engine power.
 				var mud_drag = 1.0
 				if pitch_angle > -0.2: 
 					mud_drag = 1.0 - (current_mud_sink_ratio * 0.4)
@@ -266,7 +286,6 @@ func _physics_process(delta: float) -> void:
 				var net_forward = (data.engine_power * current_traction * mud_drag) + slope_gravity
 				var final_speed = clamp(net_forward, -data.move_speed * 0.5, data.move_speed)
 				
-				# THE CRAWLER GEAR: Fixes the Stall-Out bug entirely!
 				if final_speed < (data.move_speed * 0.2) and current_traction >= 0.5:
 					final_speed = data.move_speed * 0.2
 				
@@ -305,7 +324,6 @@ func _physics_process(delta: float) -> void:
 		State.DIGGING:
 			velocity = Vector2.ZERO
 			if is_instance_valid(ground_node):
-				# SCALED DIGGING: Multiplies dimensions by lane scale (0.7, 0.85, 1.0)
 				var flat_w = int(30 * target_scale)
 				var slope_w = int(20 * target_scale)
 				var depth = 40.0 * target_scale
@@ -338,12 +356,10 @@ func _apply_vehicle_physics(delta: float) -> void:
 
 	var buffer: float = 10.0 * target_scale
 
-	# 1. KINEMATIC MOMENTUM
 	vertical_velocity += gravity * delta
 	global_position.y += vertical_velocity * delta
 	sprite.rotation += angular_velocity * delta
 
-	# 2. CONTINUOUS DYNAMIC SENSORS 
 	var max_tread_pen: float = -9999.0
 	var max_bumper_pen: float = -9999.0
 	var max_f_pen: float = -9999.0
@@ -378,12 +394,10 @@ func _apply_vehicle_physics(delta: float) -> void:
 			if true_x > cached_contact_fwd and penetration > max_bumper_pen: 
 				max_bumper_pen = penetration
 
-	# Engine Mud Drag Tracker
 	current_mud_sink_ratio = clamp(max_tread_pen / buffer, 0.0, 1.0) if max_tread_pen > 0.0 else 0.0
 
-	# 3. Y-POSITION & MUD SUSPENSION (Added small stability hysteresis to prevent flickering)
 	if is_physically_stable:
-		is_physically_stable = max_tread_pen > -3.5 # Slightly wider threshold to stay stable
+		is_physically_stable = max_tread_pen > -3.5 
 	else:
 		is_physically_stable = max_tread_pen > -1.5
 
@@ -394,7 +408,6 @@ func _apply_vehicle_physics(delta: float) -> void:
 		var mud_thickness: float = max_tread_pen / buffer
 		vertical_velocity = lerp(vertical_velocity, 0.0, 20.0 * mud_thickness * delta)
 
-	# 4. ROTATION (Calculates raw target angle based on ground slope)
 	var raw_target_angle: float = sprite.rotation 
 
 	if max_f_pen > -10.0 and max_b_pen > -10.0:
@@ -405,21 +418,16 @@ func _apply_vehicle_physics(delta: float) -> void:
 	elif max_f_pen > -10.0:
 		raw_target_angle = -1.0 * move_dir
 
-	# PROPORTIONAL OVERRIDE
 	if max_bumper_pen > buffer:
 		var bumper_push = (max_bumper_pen - buffer) * 0.05
 		raw_target_angle -= bumper_push * move_dir
 
 	raw_target_angle = clamp(raw_target_angle, -1.2, 1.2)
-
-	# Slowed down the blending slightly to filter out micro-bumps from the ground grid
 	smoothed_target_angle = lerp_angle(smoothed_target_angle, raw_target_angle, 8.0 * delta)
 
-	# 5. ANGULAR MOMENTUM (Critically damped spring to eliminate vibration)
 	var angle_diff = smoothed_target_angle - sprite.rotation
 
 	if is_physically_stable:
-		# Lowered spring force (12.0) and increased damping (22.0) to stop the chatter
 		var spring_force = angle_diff * 12.0
 		angular_velocity += spring_force * delta
 		angular_velocity = lerp(angular_velocity, 0.0, 22.0 * delta)
@@ -430,5 +438,4 @@ func _apply_vehicle_physics(delta: float) -> void:
 	sprite.rotation = clamp(sprite.rotation, -1.2, 1.2)
 	angular_velocity = clamp(angular_velocity, -2.5, 2.5)
 
-	# 6. TRACTION
 	current_traction = 1.0 if is_physically_stable else 0.2
