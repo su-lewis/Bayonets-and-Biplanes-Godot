@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bnwpvswu4xwnw"
-path="res://.godot/imported/unit_british_rifleman_walk.png-5813e532f3f4ba382b83177ac734bd4e.ctex"
+uid="uid://hkr0t4h06ao8"
+path="res://.godot/imported/unit_british_tank_base.png-1fdae12f065056c44473efd47a59812e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Units/unit_british_rifleman_walk.png"
-dest_files=["res://.godot/imported/unit_british_rifleman_walk.png-5813e532f3f4ba382b83177ac734bd4e.ctex"]
+source_file="res://Units/unit_british_tank_base.png"
+dest_files=["res://.godot/imported/unit_british_tank_base.png-1fdae12f065056c44473efd47a59812e.ctex"]
 
 [params]
 

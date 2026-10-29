@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bol5ga44uplqf"
-path="res://.godot/imported/unit_british_tank.png-c04a80c38fb2cf42472ab665cf3ace62.ctex"
+uid="uid://4ejf41mgvfix"
+path="res://.godot/imported/anim_unit_british_rifleman_base_aim.png-34500f3e6ad46b0edc2ebc2a6077377a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Units/unit_british_tank.png"
-dest_files=["res://.godot/imported/unit_british_tank.png-c04a80c38fb2cf42472ab665cf3ace62.ctex"]
+source_file="res://Units/anim_unit_british_rifleman_base_aim.png"
+dest_files=["res://.godot/imported/anim_unit_british_rifleman_base_aim.png-34500f3e6ad46b0edc2ebc2a6077377a.ctex"]
 
 [params]
 

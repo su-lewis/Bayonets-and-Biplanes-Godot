@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://qw5uyunj3o2f"]
 
 [ext_resource type="Script" uid="uid://nay6m4usp7i3" path="res://Scripts/unit_base.gd" id="1_k0k2g"]
-[ext_resource type="Texture2D" uid="uid://cloxc486eli66" path="res://Units/unit_british_rifleman_aim.png" id="2_a1yoe"]
-[ext_resource type="Texture2D" uid="uid://bnwpvswu4xwnw" path="res://Units/unit_british_rifleman_walk.png" id="3_k0k2g"]
+[ext_resource type="Texture2D" uid="uid://4ejf41mgvfix" path="res://Units/anim_unit_british_rifleman_base_aim.png" id="2_k0k2g"]
+[ext_resource type="Texture2D" uid="uid://q7m4facasuam" path="res://Units/anim_unit_british_rifleman_base_walk.png" id="3_h3osf"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_t3uvl"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("2_a1yoe")
+"texture": ExtResource("2_k0k2g")
 }],
 "loop": 1,
 "name": &"aim",
@@ -16,7 +16,7 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("3_k0k2g")
+"texture": ExtResource("3_h3osf")
 }],
 "loop": 1,
 "name": &"walk",
@@ -32,10 +32,10 @@ collision_layer = 2
 script = ExtResource("1_k0k2g")
 
 [node name="Sprite2D" type="AnimatedSprite2D" parent="." unique_id=786232574]
-scale = Vector2(0.25, 0.25)
+scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_t3uvl")
-animation = &"walk"
-offset = Vector2(0, -256)
+animation = &"aim"
+offset = Vector2(0, -150)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=243647102]
 position = Vector2(-23, -62)

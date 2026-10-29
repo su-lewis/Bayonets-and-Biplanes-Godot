@@ -66,11 +66,6 @@ grow_vertical = 2
 texture = SubResource("GradientTexture2D_uaeut")
 expand_mode = 1
 
-[node name="SkyDay" parent="sky_day/ParallaxLayer" index="1" unique_id=956951949]
-visible = false
-z_index = -10
-position = Vector2(0, -1010)
-
 [node name="town_backdrop" parent="." unique_id=13792386 instance=ExtResource("2_fc4l0")]
 
 [node name="Lanes" parent="." unique_id=504141385 instance=ExtResource("9_ssrdg")]
