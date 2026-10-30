@@ -5,7 +5,7 @@
 
 [node name="Factory" type="Sprite2D" unique_id=462115179 node_paths=PackedStringArray("ground_lanes", "tank_marker", "plane_marker")]
 z_as_relative = false
-scale = Vector2(0.55, 0.55)
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_0vuhr")
 script = ExtResource("2_7a8by")
 ground_lanes = [null, null, null]

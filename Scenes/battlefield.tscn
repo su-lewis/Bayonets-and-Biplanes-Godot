@@ -100,22 +100,35 @@ uv = PackedVector2Array(0, 0, 80, 0, 160, 0, 240, 0, 320, 0, 400, 0, 480, 0, 560
 
 [node name="british_factory" parent="." unique_id=462115179 instance=ExtResource("6_k53ln")]
 z_index = -1
-position = Vector2(746, 382)
+position = Vector2(436, 387.00003)
+scale = Vector2(0.9, 0.9)
 script = null
+
+[node name="PlaneMarker" parent="british_factory" index="0" unique_id=2012376125]
+position = Vector2(558.8889, -23.33334)
+
+[node name="TankMarker" parent="british_factory" index="1" unique_id=723914088]
+position = Vector2(203.33336, 391.1111)
 
 [node name="british_barracks" parent="." unique_id=2036913953 instance=ExtResource("7_uwhxi")]
 z_index = -1
-position = Vector2(385, 682)
+position = Vector2(1508.0001, 570)
+scale = Vector2(0.45, 0.45)
+
+[node name="InfantryMarker" parent="british_barracks" index="0" unique_id=1781454727]
+position = Vector2(-4.4444427, 382.22217)
 
 [node name="german_factory" parent="." unique_id=613772518 instance=ExtResource("8_xr3kp")]
 z_index = -1
 position = Vector2(11981.999, 360)
+scale = Vector2(0.55, 0.55)
 flip_h = true
 script = null
 
 [node name="german_barracks" parent="." unique_id=622011566 instance=ExtResource("9_y3su5")]
 z_index = -1
 position = Vector2(12389, 792)
+scale = Vector2(0.25, 0.25)
 flip_h = true
 
 [editable path="sky_day"]

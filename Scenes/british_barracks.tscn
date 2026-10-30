@@ -4,7 +4,7 @@
 
 [node name="Barracks" type="Sprite2D" unique_id=2036913953]
 z_as_relative = false
-scale = Vector2(0.25, 0.25)
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("1_h6s86")
 
 [node name="InfantryMarker" type="Marker2D" parent="." unique_id=1781454727]

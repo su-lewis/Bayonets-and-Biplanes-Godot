@@ -1,49 +1,102 @@
 [gd_scene format=3 uid="uid://byjlil1ks0v0v"]
 
 [ext_resource type="Script" uid="uid://cxyasqnbcrc40" path="res://Scripts/ui_spawn_panel.gd" id="1_sd512"]
+[ext_resource type="Resource" uid="uid://drglq2fftdts2" path="res://Units/british_rifleman_base.tres" id="2_s3jbq"]
+[ext_resource type="Resource" uid="uid://dodwi82mr4twc" path="res://Units/british_heavytank_base.tres" id="3_c3eba"]
+[ext_resource type="Resource" uid="uid://wxrai30fo7wb" path="res://Units/british_fighterplane_base.tres" id="4_g8s2e"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1251239764]
 script = ExtResource("1_sd512")
-
-[node name="ColorRect" type="ColorRect" parent="." unique_id=2070462422]
-visible = false
-z_index = -2
-anchors_preset = -1
-anchor_top = 0.91700006
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -0.3600464
-grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.4412211, 0.49061358, 0, 1)
+rifleman_data = ExtResource("2_s3jbq")
+tank_data = ExtResource("3_c3eba")
+biplane_data = ExtResource("4_g8s2e")
 
 [node name="UI top2" type="Node2D" parent="." unique_id=1042905429]
 position = Vector2(0, 980)
 
-[node name="Label" type="Label" parent="." unique_id=30428898]
-offset_left = 460.0
-offset_top = 1039.0
-offset_right = 500.0
-offset_bottom = 1062.0
+[node name="Control" type="Control" parent="." unique_id=1579393373]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
 
-[node name="RiflemanButton" type="Button" parent="." unique_id=1981003162]
-offset_left = 572.0
-offset_top = 1016.0
-offset_right = 810.0
-offset_bottom = 1076.0
+[node name="ColorRect" type="ColorRect" parent="Control" unique_id=2070462422]
+z_index = -2
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 940.0
+offset_right = 1880.0
+offset_bottom = 1040.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.48370606, 0.46585977, 0.26393637, 1)
+
+[node name="StateARecruitment" type="HBoxContainer" parent="Control" unique_id=336468350]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 940.0
+offset_right = 1880.0
+offset_bottom = 1040.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="LaneSelectorButton" type="Button" parent="Control/StateARecruitment" unique_id=1025678544]
+layout_mode = 2
+text = "LANE: MID"
+
+[node name="WarBondsLabel" type="Label" parent="Control/StateARecruitment" unique_id=49314200]
+layout_mode = 2
+text = "$1,200 / War Bonds: 62"
+
+[node name="UnitQueue" type="HBoxContainer" parent="Control/StateARecruitment" unique_id=1669957423]
+layout_mode = 2
+
+[node name="RiflemanButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1981003162]
+layout_mode = 2
 text = "Spawn Soldier (75 War Bonds)"
 
-[node name="TankButton" type="Button" parent="." unique_id=1696888547]
-offset_left = 1126.0
-offset_top = 1016.0
-offset_right = 1364.0
-offset_bottom = 1076.0
+[node name="TankButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1696888547]
+layout_mode = 2
 text = "Spawn Tank (250 War Bonds)"
 
-[node name="PlaneButton" type="Button" parent="." unique_id=1083310906]
-offset_left = 814.0
-offset_top = 1016.0
-offset_right = 1135.0
-offset_bottom = 1076.0
-scale = Vector2(0.96, 1)
+[node name="PlaneButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1083310906]
+layout_mode = 2
 text = "Call Biplane Air Support (120 War Bonds)"
+
+[node name="StateBGarrison" type="HBoxContainer" parent="Control" unique_id=229553386]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 940.0
+offset_right = 1880.0
+offset_bottom = 1040.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="TrenchInfoLabel" type="Label" parent="Control/StateBGarrison" unique_id=1588868376]
+layout_mode = 2
+text = "MID: FRONTLINE"
+
+[node name="GarrisonDescLabel" type="Label" parent="Control/StateBGarrison" unique_id=612828406]
+layout_mode = 2
+text = "Garrison: 2x Rifle, 1x Mortar"
+
+[node name="AdvanceButton" type="Button" parent="Control/StateBGarrison" unique_id=1623255674]
+layout_mode = 2
+text = "ADVANCE"
+
+[node name="FallBackButton" type="Button" parent="Control/StateBGarrison" unique_id=742839850]
+layout_mode = 2
+text = "FALL BACK"
+
+[node name="CloseButton" type="Button" parent="Control/StateBGarrison" unique_id=1201681337]
+layout_mode = 2
+text = "Close"
