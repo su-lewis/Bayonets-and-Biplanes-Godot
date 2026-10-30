@@ -25,8 +25,9 @@ func _ready() -> void:
 
 	SignalBus.spawn_unit_requested.connect(_on_spawn_unit_requested)
 
-func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
+func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_lane_name: String = "BOT") -> void:
 	if not unit_data or not unit_data.scene: return
+	if ordered_lanes.is_empty(): return
 	
 	var spawn_point: Node2D = infantry_marker
 	match unit_data.spawn_facility:
@@ -50,8 +51,14 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
 	var min_y: float = 400.0
 	var max_y: float = 990.0 
 	
-	var base_lane_idx = current_lane_index
-	current_lane_index = (current_lane_index + 1) % ordered_lanes.size()
+	# Map the HUD lane string to the sorted ground lanes:
+	# ordered_lanes[0] = Bottom (highest Y), [1] = Mid, [2] = Top (lowest Y)
+	var base_lane_idx: int = 0
+	match target_lane_name:
+		"TOP": base_lane_idx = clampi(2, 0, ordered_lanes.size() - 1)
+		"MID": base_lane_idx = clampi(1, 0, ordered_lanes.size() - 1)
+		"BOT": base_lane_idx = 0
+		_: base_lane_idx = 0
 	
 	# Calculate infantry sub-lane offsets (+30, +60, +90)
 	var sub_offsets = [30.0, 60.0, 90.0]
@@ -93,8 +100,11 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool) -> void:
 		
 		new_unit.global_position = spawn_point.global_position - Vector2(x_stagger, 0)
 		new_unit.target_lane_y = final_target_y
-		new_unit.start_x = spawn_point.global_position.x 
-		new_unit.target_scale = new_unit.base_scale * lerp(0.70, 1.00, weight)
+		new_unit.start_x = spawn_point.global_position.x
+		new_unit.perspective_min_y = min_y
+		new_unit.perspective_max_y = max_y
+		# Start immediately at bottom-lane scale:
+		new_unit.update_perspective_scale()
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:

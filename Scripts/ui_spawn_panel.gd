@@ -46,7 +46,7 @@ func _ready() -> void:
 	if btn_tank and tank_data:
 		btn_tank.pressed.connect(_on_spawn_button_pressed.bind(tank_data, btn_tank))
 	if btn_plane and biplane_data:
-		btn_plane.pressed.connect(_on_spawn_button_pressed.bind(biplane_data, biplane_data))
+		btn_plane.pressed.connect(_on_spawn_button_pressed.bind(biplane_data, btn_plane))
 
 	# 3. Bind Lane Selector
 	if btn_lane_selector:
@@ -86,8 +86,8 @@ func _on_war_bonds_changed(new_count: int) -> void:
 
 func _on_spawn_button_pressed(data: UnitData, button: Button) -> void:
 	if GameManager and GameManager.spend_war_bonds(data.cost):
-		# Emit spawn request with the active lane and unit data
-		SignalBus.spawn_unit_requested.emit(data, current_lane)
+		# Pass unit data, is_enemy (false), and the selected HUD lane
+		SignalBus.spawn_unit_requested.emit(data, false, current_lane)
 		
 		# Apply a 5-second recruitment cooldown on that button
 		cooldowns[button] = 5.0

@@ -25,6 +25,10 @@ var base_scale: float = 1.0
 var start_x: float = 0.0
 var start_y_for_scale: float = 0.0
 
+var perspective_min_y: float = 400.0
+var perspective_max_y: float = 990.0
+@export var diagonal_angle_degrees: float = 30.0
+
 # --- TIE-BREAKER Z-INDEXING ---
 static var global_spawn_counter: int = 0
 var assigned_tie_breaker: int = 0
@@ -56,7 +60,7 @@ var cached_contact_bwd: float = 0.0
 
 func _ready() -> void:
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
-	current_hp = data.max_hp
+	current_hp = data.max_hp if data else 100.0
 	start_x = global_position.x
 	start_y_for_scale = global_position.y
 
@@ -66,22 +70,20 @@ func _ready() -> void:
 
 	if is_infantry:
 		unit_type = UnitType.INFANTRY
-		# Lock depth bucket: Sub-lane layer + Tie-breaker (No local offset here, Spawner handles target_lane_y)
 		z_index = 200 + (infantry_sub_lane * 50) + assigned_tie_breaker
 	else:
-		# Lock vehicle depth bucket: Armored Cars always render on top of Tanks
 		z_index = int(unit_type) + assigned_tie_breaker
 
 	if sprite: 
 		base_scale = abs(sprite.scale.x)
-		if is_equal_approx(target_scale, 1.0):
-			target_scale = base_scale
+		update_perspective_scale()
 		
 	move_dir = -1.0 if is_enemy else 1.0
 	add_to_group("enemy_units" if is_enemy else "player_units")
 
-	for weapon in data.weapons:
-		weapon_cooldowns[weapon] = 0.0
+	if data:
+		for weapon in data.weapons:
+			weapon_cooldowns[weapon] = 0.0
 		
 	if is_sapper:
 		current_state = State.MOVE_TO_BUILD
@@ -122,10 +124,16 @@ func _ready() -> void:
 		sprite.rotation = old_rot
 		sprite.scale = old_scale
 		
-	if data.is_vehicle or is_sapper:
+	if data and (data.is_vehicle or is_sapper):
 		var parent_lane = get_parent()
 		if parent_lane and parent_lane.has_node("DestructibleGround"):
 			ground_node = parent_lane.get_node("DestructibleGround")
+
+func update_perspective_scale() -> void:
+	if not sprite: return
+	var weight = clamp((global_position.y - perspective_min_y) / (perspective_max_y - perspective_min_y), 0.0, 1.0)
+	target_scale = base_scale * lerp(0.70, 1.00, weight)
+	_set_sprite_scale(target_scale)
 
 func _get_track_shape() -> Node2D:
 	if sprite:
@@ -144,10 +152,11 @@ func _set_sprite_scale(s: float) -> void:
 		sprite.flip_h = is_enemy
 
 func take_damage(amount: float, pen_mm: float, is_vital: bool) -> void:
-	var actual_damage = CombatResolver.calculate_damage(amount, pen_mm, data.armor_thickness_mm, is_vital)
+	var armor = data.armor_thickness_mm if data else 0.0
+	var actual_damage = CombatResolver.calculate_damage(amount, pen_mm, armor, is_vital)
 	
 	if current_state == State.GARRISONED:
-		actual_damage *= 0.5 # Sappers get 50% damage reduction in trenches!
+		actual_damage *= 0.5
 		
 	if actual_damage > 0:
 		current_hp -= actual_damage
@@ -158,6 +167,7 @@ func take_damage(amount: float, pen_mm: float, is_vital: bool) -> void:
 		queue_free()
 
 func _find_target() -> void:
+	if not data: return
 	var enemy_group = "player_units" if is_enemy else "enemy_units"
 	var closest_enemy: BaseUnit = null
 	var max_range: float = 0.0
@@ -177,7 +187,7 @@ func _find_target() -> void:
 	current_target = closest_enemy
 
 func _fire_weapons() -> void:
-	if not is_instance_valid(current_target): return
+	if not data or not is_instance_valid(current_target): return
 	var dist = abs(current_target.global_position.x - global_position.x)
 	var is_moving = (current_state != State.ATTACK and current_state != State.GARRISONED)
 	
@@ -214,6 +224,7 @@ func _spawn_tracer(target: BaseUnit, is_hit: bool) -> void:
 	tween.tween_callback(tracer.queue_free)
 
 func _physics_process(delta: float) -> void:
+	if not data: return
 	if search_timer > 0.0: search_timer -= delta
 	for weapon in weapon_cooldowns.keys():
 		if weapon_cooldowns[weapon] > 0.0: weapon_cooldowns[weapon] -= delta
@@ -251,28 +262,37 @@ func _physics_process(delta: float) -> void:
 	match current_state:
 		State.ROLLOUT:
 			velocity = Vector2(data.move_speed * move_dir, 0)
-			if (not is_enemy and global_position.x >= start_x + data.walk_out_distance) or \
-			   (is_enemy and global_position.x <= start_x - data.walk_out_distance):
-				start_y_for_scale = global_position.y 
+			update_perspective_scale()
+			
+			var rollout_complete: bool = false
+			if not is_enemy and global_position.x >= start_x + data.walk_out_distance:
+				rollout_complete = true
+			elif is_enemy and global_position.x <= start_x - data.walk_out_distance:
+				rollout_complete = true
+
+			if rollout_complete:
+				start_y_for_scale = global_position.y
 				if is_sapper:
 					current_state = State.MOVE_TO_BUILD
+				elif is_equal_approx(global_position.y, target_lane_y):
+					current_state = State.LANE_PUSH
 				else:
-					current_state = State.LANE_PUSH if data.is_vehicle else State.DIAGONAL_PUSH
+					current_state = State.DIAGONAL_PUSH
 				
 		State.DIAGONAL_PUSH:
 			var y_diff = target_lane_y - global_position.y
-			var vertical_speed = max(data.move_speed * 2.0, 200.0)
 			
-			if abs(y_diff) <= vertical_speed * delta:
+			if abs(y_diff) <= 2.0:
 				global_position.y = target_lane_y
-				_set_sprite_scale(target_scale)
+				update_perspective_scale()
 				current_state = State.LANE_PUSH
 			else:
-				velocity = Vector2(data.move_speed * move_dir, sign(y_diff) * vertical_speed)
-				var total_y_dist = abs(target_lane_y - start_y_for_scale)
-				if total_y_dist > 0.1:
-					var progress = clamp(abs(global_position.y - start_y_for_scale) / total_y_dist, 0.0, 1.0)
-					_set_sprite_scale(lerp(base_scale, target_scale, progress))
+				var rad = deg_to_rad(diagonal_angle_degrees)
+				var dir_x = cos(rad) * move_dir
+				var dir_y = sin(rad) * sign(y_diff)
+				var move_vector = Vector2(dir_x, dir_y).normalized() * data.move_speed
+				velocity = move_vector
+				update_perspective_scale()
 				
 		State.LANE_PUSH:
 			if data.is_vehicle:
@@ -294,7 +314,7 @@ func _physics_process(delta: float) -> void:
 			else:
 				velocity = Vector2(data.move_speed * move_dir, 0)
 				
-			_set_sprite_scale(target_scale)
+			update_perspective_scale()
 			if sprite is AnimatedSprite2D and sprite.animation != "walk":
 				sprite.play("walk")
 			if is_instance_valid(current_target): _fire_weapons()
@@ -307,7 +327,7 @@ func _physics_process(delta: float) -> void:
 		# --- SAPPER STATES ---
 		State.MOVE_TO_BUILD:
 			velocity = Vector2(data.move_speed * move_dir, 0)
-			_set_sprite_scale(target_scale)
+			update_perspective_scale()
 			if sprite is AnimatedSprite2D and sprite.animation != "walk":
 				sprite.play("walk")
 				
@@ -346,9 +366,9 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
-	if data.is_vehicle and is_instance_valid(ground_node):
+	# Only apply ground physics when the vehicle is in its lane, not during rollout or diagonal travel
+	if data.is_vehicle and is_instance_valid(ground_node) and current_state in [State.LANE_PUSH, State.ATTACK]:
 		_apply_vehicle_physics(delta)
-
 
 # --- VEHICLE PHYSICS ---
 func _apply_vehicle_physics(delta: float) -> void:
