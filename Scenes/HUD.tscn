@@ -15,88 +15,143 @@ biplane_data = ExtResource("4_g8s2e")
 position = Vector2(0, 980)
 
 [node name="Control" type="Control" parent="." unique_id=1579393373]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="ColorRect" type="ColorRect" parent="Control" unique_id=2070462422]
-z_index = -2
-layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 940.0
-offset_right = 1880.0
-offset_bottom = 1040.0
+offset_top = -100.0
 grow_horizontal = 2
 grow_vertical = 0
-color = Color(0.48370606, 0.46585977, 0.26393637, 1)
+
+[node name="Background" type="ColorRect" parent="Control" unique_id=2070462422]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0.2, 0.16, 0.95)
 
 [node name="StateARecruitment" type="HBoxContainer" parent="Control" unique_id=336468350]
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 940.0
-offset_right = 1880.0
-offset_bottom = 1040.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
+theme_override_constants/separation = 20
 
 [node name="LaneSelectorButton" type="Button" parent="Control/StateARecruitment" unique_id=1025678544]
+custom_minimum_size = Vector2(130, 48)
 layout_mode = 2
-text = "LANE: MID"
+size_flags_vertical = 4
+text = "[LANE: MID]"
 
 [node name="WarBondsLabel" type="Label" parent="Control/StateARecruitment" unique_id=49314200]
 layout_mode = 2
 text = "$1,200 / War Bonds: 62"
 
-[node name="UnitQueue" type="HBoxContainer" parent="Control/StateARecruitment" unique_id=1669957423]
+[node name="VSeparator" type="VSeparator" parent="Control/StateARecruitment" unique_id=1208080336]
 layout_mode = 2
 
-[node name="RiflemanButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1981003162]
+[node name="UnitQueueScroll" type="ScrollContainer" parent="Control/StateARecruitment" unique_id=2104686090]
 layout_mode = 2
-text = "Spawn Soldier (75 War Bonds)"
+size_flags_horizontal = 3
+size_flags_vertical = 4
+vertical_scroll_mode = 0
 
-[node name="TankButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1696888547]
+[node name="UnitQueue" type="HBoxContainer" parent="Control/StateARecruitment/UnitQueueScroll" unique_id=1669957423]
 layout_mode = 2
-text = "Spawn Tank (250 War Bonds)"
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_constants/separation = 12
 
-[node name="PlaneButton" type="Button" parent="Control/StateARecruitment/UnitQueue" unique_id=1083310906]
+[node name="RiflemanButton" type="Button" parent="Control/StateARecruitment/UnitQueueScroll/UnitQueue" unique_id=1981003162]
+custom_minimum_size = Vector2(160, 48)
 layout_mode = 2
-text = "Call Biplane Air Support (120 War Bonds)"
+size_flags_vertical = 4
+text = "Rifleman ($100)"
+
+[node name="TankButton" type="Button" parent="Control/StateARecruitment/UnitQueueScroll/UnitQueue" unique_id=1696888547]
+custom_minimum_size = Vector2(160, 48)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Mark IV Tank ($250)"
+
+[node name="PlaneButton" type="Button" parent="Control/StateARecruitment/UnitQueueScroll/UnitQueue" unique_id=1083310906]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+size_flags_vertical = 4
+text = "Biplane Support ($120)"
 
 [node name="StateBGarrison" type="HBoxContainer" parent="Control" unique_id=229553386]
+visible = false
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 940.0
-offset_right = 1880.0
-offset_bottom = 1040.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = -10.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
+theme_override_constants/separation = 30
 
-[node name="TrenchInfoLabel" type="Label" parent="Control/StateBGarrison" unique_id=1588868376]
+[node name="LeftColumn" type="VBoxContainer" parent="Control/StateBGarrison" unique_id=1170164465]
 layout_mode = 2
-text = "MID: FRONTLINE"
+size_flags_vertical = 4
+alignment = 1
 
-[node name="GarrisonDescLabel" type="Label" parent="Control/StateBGarrison" unique_id=612828406]
+[node name="TrenchInfoLabel" type="Label" parent="Control/StateBGarrison/LeftColumn" unique_id=1588868376]
 layout_mode = 2
-text = "Garrison: 2x Rifle, 1x Mortar"
+text = "[MID: FRONTLINE]"
 
-[node name="AdvanceButton" type="Button" parent="Control/StateBGarrison" unique_id=1623255674]
+[node name="CloseButton" type="Button" parent="Control/StateBGarrison/LeftColumn" unique_id=1201681337]
+custom_minimum_size = Vector2(100, 32)
 layout_mode = 2
-text = "ADVANCE"
+text = "[X] Close"
 
-[node name="FallBackButton" type="Button" parent="Control/StateBGarrison" unique_id=742839850]
+[node name="VSeparator1" type="VSeparator" parent="Control/StateBGarrison" unique_id=1165549168]
 layout_mode = 2
-text = "FALL BACK"
 
-[node name="CloseButton" type="Button" parent="Control/StateBGarrison" unique_id=1201681337]
+[node name="MiddleColumn" type="VBoxContainer" parent="Control/StateBGarrison" unique_id=563848199]
 layout_mode = 2
-text = "Close"
+size_flags_horizontal = 3
+size_flags_vertical = 4
+alignment = 1
+
+[node name="GarrisonTitle" type="Label" parent="Control/StateBGarrison/MiddleColumn" unique_id=72060286]
+layout_mode = 2
+text = "GARRISON:"
+
+[node name="GarrisonDescLabel" type="Label" parent="Control/StateBGarrison/MiddleColumn" unique_id=612828406]
+layout_mode = 2
+text = "2x Rifle, 1x Mortar"
+
+[node name="VSeparator2" type="VSeparator" parent="Control/StateBGarrison" unique_id=865858825]
+layout_mode = 2
+
+[node name="RightColumn" type="HBoxContainer" parent="Control/StateBGarrison" unique_id=549240289]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="AdvanceButton" type="Button" parent="Control/StateBGarrison/RightColumn" unique_id=1623255674]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+size_flags_vertical = 4
+text = "🎺 ADVANCE"
+
+[node name="FallBackButton" type="Button" parent="Control/StateBGarrison/RightColumn" unique_id=742839850]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+size_flags_vertical = 4
+text = "📯 FALL BACK"

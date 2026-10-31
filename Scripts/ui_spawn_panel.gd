@@ -12,16 +12,16 @@ extends CanvasLayer
 # State A Nodes (Recruitment)
 @onready var label_war_bonds = $Control/StateARecruitment/WarBondsLabel
 @onready var btn_lane_selector = $Control/StateARecruitment/LaneSelectorButton
-@onready var btn_rifleman = $Control/StateARecruitment/UnitQueue/RiflemanButton
-@onready var btn_tank = $Control/StateARecruitment/UnitQueue/TankButton
-@onready var btn_plane = $Control/StateARecruitment/UnitQueue/PlaneButton
+@onready var btn_rifleman = $Control/StateARecruitment/UnitQueueScroll/UnitQueue/RiflemanButton
+@onready var btn_tank = $Control/StateARecruitment/UnitQueueScroll/UnitQueue/TankButton
+@onready var btn_plane = $Control/StateARecruitment/UnitQueueScroll/UnitQueue/PlaneButton
 
 # State B Nodes (Garrison Management)
-@onready var label_trench_info = $Control/StateBGarrison/TrenchInfoLabel
-@onready var label_garrison_desc = $Control/StateBGarrison/GarrisonDescLabel
-@onready var btn_advance = $Control/StateBGarrison/AdvanceButton
-@onready var btn_fall_back = $Control/StateBGarrison/FallBackButton
-@onready var btn_close_garrison = $Control/StateBGarrison/CloseButton
+@onready var label_trench_info = $Control/StateBGarrison/LeftColumn/TrenchInfoLabel
+@onready var label_garrison_desc = $Control/StateBGarrison/MiddleColumn/GarrisonDescLabel
+@onready var btn_advance = $Control/StateBGarrison/RightColumn/AdvanceButton
+@onready var btn_fall_back = $Control/StateBGarrison/RightColumn/FallBackButton
+@onready var btn_close_garrison = $Control/StateBGarrison/LeftColumn/CloseButton
 
 # State Tracking
 enum HUDState { RECRUITMENT, GARRISON }
@@ -114,22 +114,30 @@ func _on_trench_selected(trench_node: Node2D) -> void:
 	active_selected_trench = trench_node
 	current_state = HUDState.GARRISON
 	
-	# Swap visible HUD panels
-	if state_a_recruitment: state_a_recruitment.visible = false
-	if state_b_garrison: state_b_garrison.visible = true
+	# Cleanly toggle states so they never overlap
+	if state_a_recruitment:
+		state_a_recruitment.hide()
+	if state_b_garrison:
+		state_b_garrison.show()
 	
 	if label_trench_info:
 		label_trench_info.text = "[" + current_lane + ": FRONTLINE]"
 	if label_garrison_desc:
-		label_garrison_desc.text = "Garrison: 2x Rifle, 1x Mortar"
+		# If your trench node has a garrison array, format it here; otherwise show current status
+		if trench_node and "current_occupants" in trench_node:
+			label_garrison_desc.text = "Occupants: %d / %d" % [trench_node.current_occupants.size(), trench_node.max_garrison]
+		else:
+			label_garrison_desc.text = "Garrison: Holding Line"
 
 func _switch_to_recruitment_state() -> void:
 	current_state = HUDState.RECRUITMENT
 	active_selected_trench = null
 	
-	# Swap visible HUD panels back
-	if state_a_recruitment: state_a_recruitment.visible = true
-	if state_b_garrison: state_b_garrison.visible = false
+	# Show recruitment, hide garrison
+	if state_b_garrison:
+		state_b_garrison.hide()
+	if state_a_recruitment:
+		state_a_recruitment.show()
 
 func _on_advance_pressed() -> void:
 	if active_selected_trench and active_selected_trench.has_method("order_advance"):

@@ -4,10 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://dwukwcjpnfk52" path="res://Scenes/town_backdrop.tscn" id="2_fc4l0"]
 [ext_resource type="Script" uid="uid://cwd6xiasx3g25" path="res://Scripts/camera_tactical.gd" id="3_tkjg1"]
 [ext_resource type="Script" uid="uid://e3yujneju6ko" path="res://Scripts/spawner_player.gd" id="3_vsh2u"]
-[ext_resource type="Resource" uid="uid://drglq2fftdts2" path="res://Units/british_rifleman_base.tres" id="4_qbwnf"]
-[ext_resource type="Resource" uid="uid://dodwi82mr4twc" path="res://Units/british_heavytank_base.tres" id="5_ssrdg"]
 [ext_resource type="PackedScene" uid="uid://wv5sw6af01mr" path="res://Scenes/british_factory.tscn" id="6_k53ln"]
-[ext_resource type="Resource" uid="uid://wxrai30fo7wb" path="res://Units/british_fighterplane_base.tres" id="6_toobp"]
 [ext_resource type="PackedScene" uid="uid://bucr1vu21msgf" path="res://Scenes/british_barracks.tscn" id="7_uwhxi"]
 [ext_resource type="PackedScene" uid="uid://byjlil1ks0v0v" path="res://Scenes/HUD.tscn" id="7_xr3kp"]
 [ext_resource type="PackedScene" uid="uid://dwrbl01kov4vl" path="res://Scenes/german_factory.tscn" id="8_xr3kp"]
@@ -42,9 +39,6 @@ editor_draw_limits = true
 script = ExtResource("3_tkjg1")
 
 [node name="HUD" parent="." unique_id=1251239764 instance=ExtResource("7_xr3kp")]
-rifleman_data = ExtResource("4_qbwnf")
-tank_data = ExtResource("5_ssrdg")
-biplane_data = ExtResource("6_toobp")
 
 [node name="sky_day" parent="." unique_id=712210724 instance=ExtResource("1_k53ln")]
 layer = -10
@@ -112,8 +106,8 @@ position = Vector2(203.33336, 391.1111)
 
 [node name="british_barracks" parent="." unique_id=2036913953 instance=ExtResource("7_uwhxi")]
 z_index = -1
-position = Vector2(1508.0001, 570)
-scale = Vector2(0.45, 0.45)
+position = Vector2(1155.0001, 591)
+scale = Vector2(0.4, 0.4)
 
 [node name="InfantryMarker" parent="british_barracks" index="0" unique_id=1781454727]
 position = Vector2(-4.4444427, 382.22217)
