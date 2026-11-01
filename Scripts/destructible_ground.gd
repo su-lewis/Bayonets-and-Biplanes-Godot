@@ -60,7 +60,7 @@ func blow_crater(hit_x_global: float, radius: int, max_depth: float) -> void:
 			
 	mark_region_dirty(start_x, end_x)
 
-# --- CLEANED TRENCH DIGGING ---
+# --- TRENCH DIGGING ---
 func carve_trench_step(hit_x_global: float, flat_width: int, slope_width: int, trench_depth: float, dig_speed: float) -> bool:
 	var center_x = int(to_local(Vector2(hit_x_global, 0)).x)
 	var start_x = maxi(0, center_x - flat_width - slope_width)
@@ -149,7 +149,6 @@ func _update_chunk(chunk_idx: int) -> void:
 	var start_x = chunk_idx * chunk_size_px
 	var end_x = mini(start_x + chunk_size_px, map_width - 1)
 	
-	# Pre-allocate array capacity to prevent constant reallocations during building
 	var point_count = ceili(float(end_x - start_x) / visual_resolution) + 3
 	var points = PackedVector2Array()
 	var uvs = PackedVector2Array()
@@ -192,7 +191,30 @@ func get_exact_height(local_x: float) -> float:
 	var weight = (clamped_x - float(floor_x)) / float(ceil_x - floor_x)
 	return lerp(height_map[floor_x], height_map[ceil_x], weight)
 
-# --- CAMERA TRACKING HELPER ---
 func get_ground_bottom_y(_local_x: float = 0.0) -> float:
-	# Returns the absolute lowest Y-coordinate of this lane's solid bottom polygon
 	return base_ground_level + lane_thickness
+
+# --- TERRAIN CRUSHING (HEAVY VEHICLE TRACKS) ---
+func crush_dirt(hit_x_global: float, crush_amount: float) -> void:
+	if crush_amount <= 0.001: return
+	var center_x = int(to_local(Vector2(hit_x_global, 0)).x)
+	var crush_radius = 12 
+	
+	var start_x = maxi(0, center_x - crush_radius)
+	var end_x = mini(map_width - 1, center_x + crush_radius)
+	
+	var max_allowed_y = base_ground_level + lane_thickness - 10.0
+	var needs_visual_update = false
+	
+	for x in range(start_x, end_x):
+		var distance = abs(x - center_x)
+		var pressure_factor = 1.0 - (float(distance) / float(crush_radius))
+		var depth_to_add = crush_amount * pressure_factor
+		var target_y = min(height_map[x] + depth_to_add, max_allowed_y)
+		
+		if target_y > height_map[x]:
+			height_map[x] = target_y
+			needs_visual_update = true
+			
+	if needs_visual_update:
+		mark_region_dirty(start_x, end_x)

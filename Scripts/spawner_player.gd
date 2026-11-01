@@ -8,18 +8,18 @@ extends Node2D
 @export var plane_marker: Marker2D
 
 var ordered_lanes: Array[Node2D] = []
-var current_lane_index: int = 0
-var lane_sub_indexes: Dictionary = {} # Tracks whether a lane is using the +30, +60, or +90 slot next
+var lane_sub_indexes: Dictionary = {}
 
 func _ready() -> void:
 	y_sort_enabled = true 
 	for lane in ground_lanes:
 		lane.y_sort_enabled = true
 
+	# Sort lanes from screen bottom (largest Y) to screen top (smallest Y)
+	# Index 0 = BOT, Index 1 = MID, Index 2 = TOP
 	ordered_lanes = ground_lanes.duplicate()
 	ordered_lanes.sort_custom(func(a, b): return a.global_position.y > b.global_position.y)
 
-	# Initialize sub-lane trackers for each ground lane (0 = 30px, 1 = 60px, 2 = 90px)
 	for i in range(ordered_lanes.size()):
 		lane_sub_indexes[i] = 0
 
@@ -36,7 +36,7 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 
 	# 1. Handle Air Units
 	if unit_data.is_flying:
-		var new_plane = unit_data.scene.instantiate()
+		var new_plane = unit_data.scene.instantiate() as BaseUnit
 		new_plane.data = unit_data
 		new_plane.is_enemy = is_enemy_team
 		
@@ -51,8 +51,6 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 	var min_y: float = 400.0
 	var max_y: float = 990.0 
 	
-	# Map the HUD lane string to the sorted ground lanes:
-	# ordered_lanes[0] = Bottom (highest Y), [1] = Mid, [2] = Top (lowest Y)
 	var base_lane_idx: int = 0
 	match target_lane_name:
 		"TOP": base_lane_idx = clampi(2, 0, ordered_lanes.size() - 1)
@@ -60,7 +58,6 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 		"BOT": base_lane_idx = 0
 		_: base_lane_idx = 0
 	
-	# Calculate infantry sub-lane offsets (+30, +60, +90)
 	var sub_offsets = [30.0, 60.0, 90.0]
 	var infantry_y_offset = 0.0
 	var assigned_sub_lane = 0
@@ -68,7 +65,6 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 	if not unit_data.is_vehicle:
 		assigned_sub_lane = lane_sub_indexes.get(base_lane_idx, 0)
 		infantry_y_offset = sub_offsets[assigned_sub_lane]
-		# Cycle to the next sub-lane down for the next squad that spawns here
 		lane_sub_indexes[base_lane_idx] = (assigned_sub_lane + 1) % 3 
 		
 	for i in range(unit_data.squad_size):
@@ -81,9 +77,8 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 		var x_stagger = i * 45.0 * (-1 if is_enemy_team else 1)
 		
 		if unit_data.is_vehicle:
-			final_y_offset = 0.0 # Vehicles hug the true top line
+			final_y_offset = 0.0
 			new_unit.is_infantry = false
-			
 			if unit_data.squad_size > 1:
 				lane_idx = (base_lane_idx + i) % ordered_lanes.size()
 				x_stagger = 0.0 
@@ -93,20 +88,19 @@ func _on_spawn_unit_requested(unit_data: UnitData, is_enemy_team: bool, target_l
 			
 		var chosen_lane = ordered_lanes[lane_idx]
 		new_unit.lane_id = lane_idx 
+
+		# Add child FIRST so global_position resolves relative to viewport
 		chosen_lane.add_child(new_unit)
-		
-		var final_target_y = chosen_lane.global_position.y + final_y_offset
-		var weight = clamp((final_target_y - min_y) / (max_y - min_y), 0.0, 1.0)
-		
-		new_unit.global_position = spawn_point.global_position - Vector2(x_stagger, 0)
-		new_unit.target_lane_y = final_target_y
-		new_unit.start_x = spawn_point.global_position.x
+
 		new_unit.perspective_min_y = min_y
 		new_unit.perspective_max_y = max_y
-		# Start immediately at bottom-lane scale:
+		new_unit.global_position = spawn_point.global_position - Vector2(x_stagger, 0)
+		new_unit.start_x = new_unit.global_position.x
+		new_unit.start_y_for_scale = new_unit.global_position.y
+		new_unit.target_lane_y = chosen_lane.global_position.y + final_y_offset
 		new_unit.update_perspective_scale()
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		var mouse_pos = get_global_mouse_position()
 		var clicked_lane = null
